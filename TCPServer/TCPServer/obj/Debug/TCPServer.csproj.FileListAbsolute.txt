@@ -1,0 +1,6 @@
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TEste\Chat de voz\TCPServer\TCPServer\bin\Debug\TCPServer.dll
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TEste\Chat de voz\TCPServer\TCPServer\bin\Debug\TCPServer.pdb
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TEste\Chat de voz\TCPServer\TCPServer\obj\Debug\TCPServer.csproj.AssemblyReference.cache
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TEste\Chat de voz\TCPServer\TCPServer\obj\Debug\TCPServer.csproj.CoreCompileInputs.cache
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TEste\Chat de voz\TCPServer\TCPServer\obj\Debug\TCPServer.dll
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TEste\Chat de voz\TCPServer\TCPServer\obj\Debug\TCPServer.pdb

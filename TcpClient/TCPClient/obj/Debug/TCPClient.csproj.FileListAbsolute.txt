@@ -1,0 +1,12 @@
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TEste\Chat de voz\TCPClient\TCPClient\bin\Debug\TCPClient.dll
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TEste\Chat de voz\TCPClient\TCPClient\bin\Debug\TCPClient.pdb
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TEste\Chat de voz\TCPClient\TCPClient\obj\Debug\TCPClient.csproj.AssemblyReference.cache
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TEste\Chat de voz\TCPClient\TCPClient\obj\Debug\TCPClient.csproj.CoreCompileInputs.cache
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TEste\Chat de voz\TCPClient\TCPClient\obj\Debug\TCPClient.dll
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TEste\Chat de voz\TCPClient\TCPClient\obj\Debug\TCPClient.pdb
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\TCPClient\TCPClient\bin\Debug\TCPClient.dll
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\TCPClient\TCPClient\bin\Debug\TCPClient.pdb
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\TCPClient\TCPClient\obj\Debug\TCPClient.csproj.AssemblyReference.cache
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\TCPClient\TCPClient\obj\Debug\TCPClient.csproj.CoreCompileInputs.cache
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\TCPClient\TCPClient\obj\Debug\TCPClient.dll
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\TCPClient\TCPClient\obj\Debug\TCPClient.pdb
