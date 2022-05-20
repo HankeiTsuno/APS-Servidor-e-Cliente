@@ -36,40 +36,40 @@
             this.LabelIPAddressServer = new System.Windows.Forms.Label();
             this.TextBoxClientAddress = new System.Windows.Forms.TextBox();
             this.NumericUpDownJitterBufferClient = new System.Windows.Forms.NumericUpDown();
-            this.ButtonClient = new System.Windows.Forms.Button();
+            this.btnConectarCliente = new System.Windows.Forms.Button();
             this.LabelJitterBufferClient = new System.Windows.Forms.Label();
-            this.TextBoxClientPort = new System.Windows.Forms.TextBox();
+            this.txtBoxPortaCliente = new System.Windows.Forms.TextBox();
             this.LabelPortServer = new System.Windows.Forms.Label();
             this.LabelClient = new System.Windows.Forms.Label();
-            this.ButtonClientListen = new System.Windows.Forms.Button();
+            this.btncClienteAudio = new System.Windows.Forms.Button();
             this.LabelOutputSoundDeviceNameClient = new System.Windows.Forms.Label();
             this.ComboboxOutputSoundDeviceNameClient = new System.Windows.Forms.ComboBox();
             this.LabelIPAddressClient = new System.Windows.Forms.Label();
-            this.TextBoxServerAddress = new System.Windows.Forms.TextBox();
+            this.txtIpAdress = new System.Windows.Forms.TextBox();
             this.TextBoxServerPort = new System.Windows.Forms.TextBox();
             this.LabelServerPort = new System.Windows.Forms.Label();
             this.GroupBoxServer = new System.Windows.Forms.GroupBox();
-            this.ButtonServer = new System.Windows.Forms.Button();
+            this.btnAbrirConexao = new System.Windows.Forms.Button();
             this.ComboboxSamplesPerSecondServer = new System.Windows.Forms.ComboBox();
             this.LabelJitterBufferServer = new System.Windows.Forms.Label();
             this.LabelSamplesPerSecondServer = new System.Windows.Forms.Label();
             this.NumericUpDownJitterBufferServer = new System.Windows.Forms.NumericUpDown();
-            this.LabelServer = new System.Windows.Forms.Label();
-            this.LabelOutputSoundDeviceNameServer = new System.Windows.Forms.Label();
+            this.lblLogServer = new System.Windows.Forms.Label();
+            this.lblEntradasSistema = new System.Windows.Forms.Label();
             this.ComboboxOutputSoundDeviceNameServer = new System.Windows.Forms.ComboBox();
             this.GroupBoxSound = new System.Windows.Forms.GroupBox();
-            this.btnCamera = new System.Windows.Forms.Button();
+            this.btnClienteCamera = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.ProgressBarPlayingClient = new System.Windows.Forms.ProgressBar();
-            this.ButtonClientSpeak = new System.Windows.Forms.Button();
+            this.btnClienteMic = new System.Windows.Forms.Button();
             this.ComboboxInputSoundDeviceNameClient = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.OpenFileDialogMain = new System.Windows.Forms.OpenFileDialog();
             this.GroupBoxServerStart = new System.Windows.Forms.GroupBox();
-            this.ButtonServerListen = new System.Windows.Forms.Button();
-            this.ButtonServerSpeak = new System.Windows.Forms.Button();
+            this.btnServidorAudio = new System.Windows.Forms.Button();
+            this.btnServidorMic = new System.Windows.Forms.Button();
             this.ComboboxInputSoundDeviceNameServer = new System.Windows.Forms.ComboBox();
-            this.LabelInputSoundDeviceNameServer = new System.Windows.Forms.Label();
+            this.lblMicrofoneSistema = new System.Windows.Forms.Label();
             this.FlowLayoutPanelServerClients = new System.Windows.Forms.FlowLayoutPanel();
             this.FlowLayoutPanelServerProgressBars = new System.Windows.Forms.FlowLayoutPanel();
             this.GroupBoxServerClients = new System.Windows.Forms.GroupBox();
@@ -102,9 +102,9 @@
             this.GroupBoxClient.Controls.Add(this.LabelIPAddressServer);
             this.GroupBoxClient.Controls.Add(this.TextBoxClientAddress);
             this.GroupBoxClient.Controls.Add(this.NumericUpDownJitterBufferClient);
-            this.GroupBoxClient.Controls.Add(this.ButtonClient);
+            this.GroupBoxClient.Controls.Add(this.btnConectarCliente);
             this.GroupBoxClient.Controls.Add(this.LabelJitterBufferClient);
-            this.GroupBoxClient.Controls.Add(this.TextBoxClientPort);
+            this.GroupBoxClient.Controls.Add(this.txtBoxPortaCliente);
             this.GroupBoxClient.Controls.Add(this.LabelPortServer);
             this.GroupBoxClient.Controls.Add(this.LabelClient);
             this.GroupBoxClient.Location = new System.Drawing.Point(8, 6);
@@ -196,19 +196,19 @@
             0});
             this.NumericUpDownJitterBufferClient.ValueChanged += new System.EventHandler(this.NumericUpDownJitterBufferClient_ValueChanged);
             // 
-            // ButtonClient
+            // btnConectarCliente
             // 
-            this.ButtonClient.BackColor = System.Drawing.Color.Gainsboro;
-            this.ButtonClient.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ButtonClient.ForeColor = System.Drawing.Color.Black;
-            this.ButtonClient.Location = new System.Drawing.Point(8, 75);
-            this.ButtonClient.Margin = new System.Windows.Forms.Padding(2);
-            this.ButtonClient.Name = "ButtonClient";
-            this.ButtonClient.Size = new System.Drawing.Size(415, 45);
-            this.ButtonClient.TabIndex = 0;
-            this.ButtonClient.Text = "Connect";
-            this.ButtonClient.UseVisualStyleBackColor = false;
-            this.ButtonClient.Click += new System.EventHandler(this.ButtonClient_Click);
+            this.btnConectarCliente.BackColor = System.Drawing.Color.Gainsboro;
+            this.btnConectarCliente.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnConectarCliente.ForeColor = System.Drawing.Color.Black;
+            this.btnConectarCliente.Location = new System.Drawing.Point(8, 75);
+            this.btnConectarCliente.Margin = new System.Windows.Forms.Padding(2);
+            this.btnConectarCliente.Name = "btnConectarCliente";
+            this.btnConectarCliente.Size = new System.Drawing.Size(415, 45);
+            this.btnConectarCliente.TabIndex = 0;
+            this.btnConectarCliente.Text = "Conectar";
+            this.btnConectarCliente.UseVisualStyleBackColor = false;
+            this.btnConectarCliente.Click += new System.EventHandler(this.ButtonClient_Click);
             // 
             // LabelJitterBufferClient
             // 
@@ -221,18 +221,18 @@
             this.LabelJitterBufferClient.TabIndex = 36;
             this.LabelJitterBufferClient.Text = "Jitter";
             // 
-            // TextBoxClientPort
+            // txtBoxPortaCliente
             // 
-            this.TextBoxClientPort.BackColor = System.Drawing.Color.White;
-            this.TextBoxClientPort.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TextBoxClientPort.ForeColor = System.Drawing.Color.DimGray;
-            this.TextBoxClientPort.Location = new System.Drawing.Point(232, 46);
-            this.TextBoxClientPort.Margin = new System.Windows.Forms.Padding(2);
-            this.TextBoxClientPort.Name = "TextBoxClientPort";
-            this.TextBoxClientPort.Size = new System.Drawing.Size(59, 20);
-            this.TextBoxClientPort.TabIndex = 14;
-            this.TextBoxClientPort.Text = "7000";
-            this.TextBoxClientPort.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtBoxPortaCliente.BackColor = System.Drawing.Color.White;
+            this.txtBoxPortaCliente.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtBoxPortaCliente.ForeColor = System.Drawing.Color.DimGray;
+            this.txtBoxPortaCliente.Location = new System.Drawing.Point(232, 46);
+            this.txtBoxPortaCliente.Margin = new System.Windows.Forms.Padding(2);
+            this.txtBoxPortaCliente.Name = "txtBoxPortaCliente";
+            this.txtBoxPortaCliente.Size = new System.Drawing.Size(59, 20);
+            this.txtBoxPortaCliente.TabIndex = 14;
+            this.txtBoxPortaCliente.Text = "7000";
+            this.txtBoxPortaCliente.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // LabelPortServer
             // 
@@ -253,17 +253,19 @@
             this.LabelClient.Size = new System.Drawing.Size(414, 58);
             this.LabelClient.TabIndex = 26;
             // 
-            // ButtonClientListen
+            // btncClienteAudio
             // 
-            this.ButtonClientListen.BackColor = System.Drawing.Color.Gainsboro;
-            this.ButtonClientListen.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ButtonClientListen.Location = new System.Drawing.Point(125, 56);
-            this.ButtonClientListen.Margin = new System.Windows.Forms.Padding(2);
-            this.ButtonClientListen.Name = "ButtonClientListen";
-            this.ButtonClientListen.Size = new System.Drawing.Size(32, 32);
-            this.ButtonClientListen.TabIndex = 45;
-            this.ButtonClientListen.UseVisualStyleBackColor = false;
-            this.ButtonClientListen.Click += new System.EventHandler(this.ButtonClientListen_Click);
+            this.btncClienteAudio.BackColor = System.Drawing.Color.Gainsboro;
+            this.btncClienteAudio.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btncClienteAudio.BackgroundImage")));
+            this.btncClienteAudio.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btncClienteAudio.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btncClienteAudio.Location = new System.Drawing.Point(125, 56);
+            this.btncClienteAudio.Margin = new System.Windows.Forms.Padding(2);
+            this.btncClienteAudio.Name = "btncClienteAudio";
+            this.btncClienteAudio.Size = new System.Drawing.Size(32, 32);
+            this.btncClienteAudio.TabIndex = 45;
+            this.btncClienteAudio.UseVisualStyleBackColor = false;
+            this.btncClienteAudio.Click += new System.EventHandler(this.ButtonClientListen_Click);
             // 
             // LabelOutputSoundDeviceNameClient
             // 
@@ -302,18 +304,18 @@
             this.LabelIPAddressClient.TabIndex = 19;
             this.LabelIPAddressClient.Text = "IP Address";
             // 
-            // TextBoxServerAddress
+            // txtIpAdress
             // 
-            this.TextBoxServerAddress.BackColor = System.Drawing.Color.White;
-            this.TextBoxServerAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TextBoxServerAddress.ForeColor = System.Drawing.Color.DimGray;
-            this.TextBoxServerAddress.Location = new System.Drawing.Point(68, 22);
-            this.TextBoxServerAddress.Margin = new System.Windows.Forms.Padding(2);
-            this.TextBoxServerAddress.Name = "TextBoxServerAddress";
-            this.TextBoxServerAddress.Size = new System.Drawing.Size(167, 20);
-            this.TextBoxServerAddress.TabIndex = 13;
-            this.TextBoxServerAddress.Text = "192.168.0.101";
-            this.TextBoxServerAddress.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtIpAdress.BackColor = System.Drawing.Color.White;
+            this.txtIpAdress.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtIpAdress.ForeColor = System.Drawing.Color.DimGray;
+            this.txtIpAdress.Location = new System.Drawing.Point(68, 22);
+            this.txtIpAdress.Margin = new System.Windows.Forms.Padding(2);
+            this.txtIpAdress.Name = "txtIpAdress";
+            this.txtIpAdress.Size = new System.Drawing.Size(167, 20);
+            this.txtIpAdress.TabIndex = 13;
+            this.txtIpAdress.Text = "192.168.0.101";
+            this.txtIpAdress.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // TextBoxServerPort
             // 
@@ -342,15 +344,15 @@
             // GroupBoxServer
             // 
             this.GroupBoxServer.Controls.Add(this.LabelIPAddressClient);
-            this.GroupBoxServer.Controls.Add(this.TextBoxServerAddress);
-            this.GroupBoxServer.Controls.Add(this.ButtonServer);
+            this.GroupBoxServer.Controls.Add(this.txtIpAdress);
+            this.GroupBoxServer.Controls.Add(this.btnAbrirConexao);
             this.GroupBoxServer.Controls.Add(this.LabelServerPort);
             this.GroupBoxServer.Controls.Add(this.ComboboxSamplesPerSecondServer);
             this.GroupBoxServer.Controls.Add(this.LabelJitterBufferServer);
             this.GroupBoxServer.Controls.Add(this.LabelSamplesPerSecondServer);
             this.GroupBoxServer.Controls.Add(this.TextBoxServerPort);
             this.GroupBoxServer.Controls.Add(this.NumericUpDownJitterBufferServer);
-            this.GroupBoxServer.Controls.Add(this.LabelServer);
+            this.GroupBoxServer.Controls.Add(this.lblLogServer);
             this.GroupBoxServer.Location = new System.Drawing.Point(6, 59);
             this.GroupBoxServer.Name = "GroupBoxServer";
             this.GroupBoxServer.Size = new System.Drawing.Size(432, 157);
@@ -358,18 +360,19 @@
             this.GroupBoxServer.TabStop = false;
             this.GroupBoxServer.Text = "Server";
             // 
-            // ButtonServer
+            // btnAbrirConexao
             // 
-            this.ButtonServer.BackColor = System.Drawing.Color.Gainsboro;
-            this.ButtonServer.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ButtonServer.Location = new System.Drawing.Point(346, 18);
-            this.ButtonServer.Margin = new System.Windows.Forms.Padding(2);
-            this.ButtonServer.Name = "ButtonServer";
-            this.ButtonServer.Size = new System.Drawing.Size(75, 27);
-            this.ButtonServer.TabIndex = 0;
-            this.ButtonServer.Text = "Start";
-            this.ButtonServer.UseVisualStyleBackColor = false;
-            this.ButtonServer.Click += new System.EventHandler(this.ButtonServer_Click);
+            this.btnAbrirConexao.BackColor = System.Drawing.Color.Green;
+            this.btnAbrirConexao.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAbrirConexao.ForeColor = System.Drawing.Color.White;
+            this.btnAbrirConexao.Location = new System.Drawing.Point(346, 18);
+            this.btnAbrirConexao.Margin = new System.Windows.Forms.Padding(2);
+            this.btnAbrirConexao.Name = "btnAbrirConexao";
+            this.btnAbrirConexao.Size = new System.Drawing.Size(75, 27);
+            this.btnAbrirConexao.TabIndex = 0;
+            this.btnAbrirConexao.Text = "Abrir";
+            this.btnAbrirConexao.UseVisualStyleBackColor = false;
+            this.btnAbrirConexao.Click += new System.EventHandler(this.ButtonServer_Click);
             // 
             // ComboboxSamplesPerSecondServer
             // 
@@ -433,24 +436,24 @@
             0});
             this.NumericUpDownJitterBufferServer.ValueChanged += new System.EventHandler(this.NumericUpDownJitterBufferServer_ValueChanged);
             // 
-            // LabelServer
+            // lblLogServer
             // 
-            this.LabelServer.BackColor = System.Drawing.Color.DarkSeaGreen;
-            this.LabelServer.Location = new System.Drawing.Point(9, 85);
-            this.LabelServer.Name = "LabelServer";
-            this.LabelServer.Size = new System.Drawing.Size(412, 59);
-            this.LabelServer.TabIndex = 28;
+            this.lblLogServer.BackColor = System.Drawing.Color.DarkSeaGreen;
+            this.lblLogServer.Location = new System.Drawing.Point(9, 85);
+            this.lblLogServer.Name = "lblLogServer";
+            this.lblLogServer.Size = new System.Drawing.Size(412, 59);
+            this.lblLogServer.TabIndex = 28;
             // 
-            // LabelOutputSoundDeviceNameServer
+            // lblEntradasSistema
             // 
-            this.LabelOutputSoundDeviceNameServer.AutoSize = true;
-            this.LabelOutputSoundDeviceNameServer.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.LabelOutputSoundDeviceNameServer.Location = new System.Drawing.Point(6, 61);
-            this.LabelOutputSoundDeviceNameServer.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.LabelOutputSoundDeviceNameServer.Name = "LabelOutputSoundDeviceNameServer";
-            this.LabelOutputSoundDeviceNameServer.Size = new System.Drawing.Size(46, 17);
-            this.LabelOutputSoundDeviceNameServer.TabIndex = 11;
-            this.LabelOutputSoundDeviceNameServer.Text = "Listen";
+            this.lblEntradasSistema.AutoSize = true;
+            this.lblEntradasSistema.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblEntradasSistema.Location = new System.Drawing.Point(-1, 61);
+            this.lblEntradasSistema.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lblEntradasSistema.Name = "lblEntradasSistema";
+            this.lblEntradasSistema.Size = new System.Drawing.Size(44, 17);
+            this.lblEntradasSistema.TabIndex = 11;
+            this.lblEntradasSistema.Text = "Audio";
             // 
             // ComboboxOutputSoundDeviceNameServer
             // 
@@ -469,12 +472,12 @@
             // 
             // GroupBoxSound
             // 
-            this.GroupBoxSound.Controls.Add(this.btnCamera);
+            this.GroupBoxSound.Controls.Add(this.btnClienteCamera);
             this.GroupBoxSound.Controls.Add(this.label2);
             this.GroupBoxSound.Controls.Add(this.ProgressBarPlayingClient);
-            this.GroupBoxSound.Controls.Add(this.ButtonClientSpeak);
+            this.GroupBoxSound.Controls.Add(this.btnClienteMic);
             this.GroupBoxSound.Controls.Add(this.ComboboxInputSoundDeviceNameClient);
-            this.GroupBoxSound.Controls.Add(this.ButtonClientListen);
+            this.GroupBoxSound.Controls.Add(this.btncClienteAudio);
             this.GroupBoxSound.Controls.Add(this.label1);
             this.GroupBoxSound.Controls.Add(this.ComboboxOutputSoundDeviceNameClient);
             this.GroupBoxSound.Controls.Add(this.LabelOutputSoundDeviceNameClient);
@@ -484,17 +487,19 @@
             this.GroupBoxSound.TabIndex = 30;
             this.GroupBoxSound.TabStop = false;
             // 
-            // btnCamera
+            // btnClienteCamera
             // 
-            this.btnCamera.BackColor = System.Drawing.Color.Gainsboro;
-            this.btnCamera.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCamera.Location = new System.Drawing.Point(125, 93);
-            this.btnCamera.Margin = new System.Windows.Forms.Padding(2);
-            this.btnCamera.Name = "btnCamera";
-            this.btnCamera.Size = new System.Drawing.Size(32, 32);
-            this.btnCamera.TabIndex = 47;
-            this.btnCamera.UseVisualStyleBackColor = false;
-            this.btnCamera.Click += new System.EventHandler(this.btnCamera_Click);
+            this.btnClienteCamera.BackColor = System.Drawing.Color.Gainsboro;
+            this.btnClienteCamera.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnClienteCamera.BackgroundImage")));
+            this.btnClienteCamera.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnClienteCamera.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnClienteCamera.Location = new System.Drawing.Point(125, 93);
+            this.btnClienteCamera.Margin = new System.Windows.Forms.Padding(2);
+            this.btnClienteCamera.Name = "btnClienteCamera";
+            this.btnClienteCamera.Size = new System.Drawing.Size(32, 32);
+            this.btnClienteCamera.TabIndex = 47;
+            this.btnClienteCamera.UseVisualStyleBackColor = false;
+            this.btnClienteCamera.Click += new System.EventHandler(this.btnCamera_Click);
             // 
             // label2
             // 
@@ -515,17 +520,19 @@
             this.ProgressBarPlayingClient.TabIndex = 37;
             this.ProgressBarPlayingClient.Visible = false;
             // 
-            // ButtonClientSpeak
+            // btnClienteMic
             // 
-            this.ButtonClientSpeak.BackColor = System.Drawing.Color.Gainsboro;
-            this.ButtonClientSpeak.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ButtonClientSpeak.Location = new System.Drawing.Point(126, 20);
-            this.ButtonClientSpeak.Margin = new System.Windows.Forms.Padding(2);
-            this.ButtonClientSpeak.Name = "ButtonClientSpeak";
-            this.ButtonClientSpeak.Size = new System.Drawing.Size(32, 32);
-            this.ButtonClientSpeak.TabIndex = 44;
-            this.ButtonClientSpeak.UseVisualStyleBackColor = false;
-            this.ButtonClientSpeak.Click += new System.EventHandler(this.ButtonClientSpeak_Click);
+            this.btnClienteMic.BackColor = System.Drawing.Color.Gainsboro;
+            this.btnClienteMic.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnClienteMic.BackgroundImage")));
+            this.btnClienteMic.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnClienteMic.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnClienteMic.Location = new System.Drawing.Point(126, 20);
+            this.btnClienteMic.Margin = new System.Windows.Forms.Padding(2);
+            this.btnClienteMic.Name = "btnClienteMic";
+            this.btnClienteMic.Size = new System.Drawing.Size(32, 32);
+            this.btnClienteMic.TabIndex = 44;
+            this.btnClienteMic.UseVisualStyleBackColor = false;
+            this.btnClienteMic.Click += new System.EventHandler(this.ButtonClientSpeak_Click);
             // 
             // ComboboxInputSoundDeviceNameClient
             // 
@@ -560,11 +567,11 @@
             // 
             // GroupBoxServerStart
             // 
-            this.GroupBoxServerStart.Controls.Add(this.ButtonServerListen);
-            this.GroupBoxServerStart.Controls.Add(this.ButtonServerSpeak);
+            this.GroupBoxServerStart.Controls.Add(this.btnServidorAudio);
+            this.GroupBoxServerStart.Controls.Add(this.btnServidorMic);
             this.GroupBoxServerStart.Controls.Add(this.ComboboxInputSoundDeviceNameServer);
-            this.GroupBoxServerStart.Controls.Add(this.LabelInputSoundDeviceNameServer);
-            this.GroupBoxServerStart.Controls.Add(this.LabelOutputSoundDeviceNameServer);
+            this.GroupBoxServerStart.Controls.Add(this.lblMicrofoneSistema);
+            this.GroupBoxServerStart.Controls.Add(this.lblEntradasSistema);
             this.GroupBoxServerStart.Controls.Add(this.ComboboxOutputSoundDeviceNameServer);
             this.GroupBoxServerStart.Location = new System.Drawing.Point(6, 222);
             this.GroupBoxServerStart.Name = "GroupBoxServerStart";
@@ -572,31 +579,33 @@
             this.GroupBoxServerStart.TabIndex = 35;
             this.GroupBoxServerStart.TabStop = false;
             // 
-            // ButtonServerListen
+            // btnServidorAudio
             // 
-            this.ButtonServerListen.BackColor = System.Drawing.Color.Gainsboro;
-            this.ButtonServerListen.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ButtonServerListen.Image = global::TCPStreamer.Properties.Resources.Listen_On;
-            this.ButtonServerListen.Location = new System.Drawing.Point(68, 52);
-            this.ButtonServerListen.Margin = new System.Windows.Forms.Padding(2);
-            this.ButtonServerListen.Name = "ButtonServerListen";
-            this.ButtonServerListen.Size = new System.Drawing.Size(32, 32);
-            this.ButtonServerListen.TabIndex = 44;
-            this.ButtonServerListen.UseVisualStyleBackColor = false;
-            this.ButtonServerListen.Click += new System.EventHandler(this.ButtonServerListen_Click);
+            this.btnServidorAudio.BackColor = System.Drawing.Color.Gainsboro;
+            this.btnServidorAudio.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnServidorAudio.BackgroundImage")));
+            this.btnServidorAudio.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnServidorAudio.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnServidorAudio.Location = new System.Drawing.Point(68, 52);
+            this.btnServidorAudio.Margin = new System.Windows.Forms.Padding(2);
+            this.btnServidorAudio.Name = "btnServidorAudio";
+            this.btnServidorAudio.Size = new System.Drawing.Size(32, 32);
+            this.btnServidorAudio.TabIndex = 44;
+            this.btnServidorAudio.UseVisualStyleBackColor = false;
+            this.btnServidorAudio.Click += new System.EventHandler(this.ButtonServerListen_Click);
             // 
-            // ButtonServerSpeak
+            // btnServidorMic
             // 
-            this.ButtonServerSpeak.BackColor = System.Drawing.Color.Gainsboro;
-            this.ButtonServerSpeak.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ButtonServerSpeak.Image = global::TCPStreamer.Properties.Resources.Speak_On;
-            this.ButtonServerSpeak.Location = new System.Drawing.Point(68, 16);
-            this.ButtonServerSpeak.Margin = new System.Windows.Forms.Padding(2);
-            this.ButtonServerSpeak.Name = "ButtonServerSpeak";
-            this.ButtonServerSpeak.Size = new System.Drawing.Size(32, 32);
-            this.ButtonServerSpeak.TabIndex = 43;
-            this.ButtonServerSpeak.UseVisualStyleBackColor = false;
-            this.ButtonServerSpeak.Click += new System.EventHandler(this.ButtonServerSpeak_Click);
+            this.btnServidorMic.BackColor = System.Drawing.Color.Gainsboro;
+            this.btnServidorMic.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnServidorMic.BackgroundImage")));
+            this.btnServidorMic.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnServidorMic.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnServidorMic.Location = new System.Drawing.Point(68, 16);
+            this.btnServidorMic.Margin = new System.Windows.Forms.Padding(2);
+            this.btnServidorMic.Name = "btnServidorMic";
+            this.btnServidorMic.Size = new System.Drawing.Size(32, 32);
+            this.btnServidorMic.TabIndex = 43;
+            this.btnServidorMic.UseVisualStyleBackColor = false;
+            this.btnServidorMic.Click += new System.EventHandler(this.ButtonServerSpeak_Click);
             // 
             // ComboboxInputSoundDeviceNameServer
             // 
@@ -613,16 +622,16 @@
             this.ComboboxInputSoundDeviceNameServer.Size = new System.Drawing.Size(304, 24);
             this.ComboboxInputSoundDeviceNameServer.TabIndex = 42;
             // 
-            // LabelInputSoundDeviceNameServer
+            // lblMicrofoneSistema
             // 
-            this.LabelInputSoundDeviceNameServer.AutoSize = true;
-            this.LabelInputSoundDeviceNameServer.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.LabelInputSoundDeviceNameServer.Location = new System.Drawing.Point(5, 24);
-            this.LabelInputSoundDeviceNameServer.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.LabelInputSoundDeviceNameServer.Name = "LabelInputSoundDeviceNameServer";
-            this.LabelInputSoundDeviceNameServer.Size = new System.Drawing.Size(48, 17);
-            this.LabelInputSoundDeviceNameServer.TabIndex = 41;
-            this.LabelInputSoundDeviceNameServer.Text = "Speak";
+            this.lblMicrofoneSistema.AutoSize = true;
+            this.lblMicrofoneSistema.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblMicrofoneSistema.Location = new System.Drawing.Point(-1, 22);
+            this.lblMicrofoneSistema.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lblMicrofoneSistema.Name = "lblMicrofoneSistema";
+            this.lblMicrofoneSistema.Size = new System.Drawing.Size(70, 17);
+            this.lblMicrofoneSistema.TabIndex = 41;
+            this.lblMicrofoneSistema.Text = "Microfone";
             // 
             // FlowLayoutPanelServerClients
             // 
@@ -722,11 +731,13 @@
             // btnEnviarMsg
             // 
             this.btnEnviarMsg.BackColor = System.Drawing.Color.Gainsboro;
+            this.btnEnviarMsg.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnEnviarMsg.BackgroundImage")));
+            this.btnEnviarMsg.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnEnviarMsg.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnEnviarMsg.Location = new System.Drawing.Point(335, 22);
+            this.btnEnviarMsg.Location = new System.Drawing.Point(352, 22);
             this.btnEnviarMsg.Margin = new System.Windows.Forms.Padding(2);
             this.btnEnviarMsg.Name = "btnEnviarMsg";
-            this.btnEnviarMsg.Size = new System.Drawing.Size(66, 32);
+            this.btnEnviarMsg.Size = new System.Drawing.Size(69, 32);
             this.btnEnviarMsg.TabIndex = 48;
             this.btnEnviarMsg.UseVisualStyleBackColor = false;
             this.btnEnviarMsg.Click += new System.EventHandler(this.btnEnviarMsg_Click);
@@ -735,11 +746,12 @@
             // 
             this.txtBoxMsg.Location = new System.Drawing.Point(14, 29);
             this.txtBoxMsg.Name = "txtBoxMsg";
-            this.txtBoxMsg.Size = new System.Drawing.Size(288, 20);
+            this.txtBoxMsg.Size = new System.Drawing.Size(333, 20);
             this.txtBoxMsg.TabIndex = 0;
             // 
             // FormMain
             // 
+            this.AcceptButton = this.btnEnviarMsg;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(460, 650);
@@ -748,7 +760,6 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "FormMain";
-            this.Text = "TCP Streamer";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormMain_FormClosing);
             this.Load += new System.EventHandler(this.FormMain_Load);
             this.GroupBoxClient.ResumeLayout(false);
@@ -775,22 +786,22 @@
 
         private System.Windows.Forms.GroupBox GroupBoxClient;
         private System.Windows.Forms.Label LabelIPAddressClient;
-        private System.Windows.Forms.TextBox TextBoxServerAddress;
+        private System.Windows.Forms.TextBox txtIpAdress;
         private System.Windows.Forms.Label LabelOutputSoundDeviceNameClient;
         private System.Windows.Forms.ComboBox ComboboxOutputSoundDeviceNameClient;
         private System.Windows.Forms.TextBox TextBoxServerPort;
         private System.Windows.Forms.Label LabelServerPort;
-        private System.Windows.Forms.Button ButtonClient;
+        private System.Windows.Forms.Button btnConectarCliente;
         private System.Windows.Forms.Label LabelClient;
         private System.Windows.Forms.GroupBox GroupBoxServer;
         private System.Windows.Forms.Label LabelIPAddressServer;
         private System.Windows.Forms.TextBox TextBoxClientAddress;
-        private System.Windows.Forms.Label LabelOutputSoundDeviceNameServer;
+        private System.Windows.Forms.Label lblEntradasSistema;
         private System.Windows.Forms.ComboBox ComboboxOutputSoundDeviceNameServer;
-        private System.Windows.Forms.TextBox TextBoxClientPort;
+        private System.Windows.Forms.TextBox txtBoxPortaCliente;
         private System.Windows.Forms.Label LabelPortServer;
-        private System.Windows.Forms.Button ButtonServer;
-        private System.Windows.Forms.Label LabelServer;
+        private System.Windows.Forms.Button btnAbrirConexao;
+        private System.Windows.Forms.Label lblLogServer;
 				private System.Windows.Forms.GroupBox GroupBoxSound;
         private System.Windows.Forms.Label LabelJitterBufferServer;
         private System.Windows.Forms.NumericUpDown NumericUpDownJitterBufferServer;
@@ -807,17 +818,17 @@
         private System.Windows.Forms.ComboBox ComboboxInputSoundDeviceNameClient;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox ComboboxInputSoundDeviceNameServer;
-        private System.Windows.Forms.Label LabelInputSoundDeviceNameServer;
+        private System.Windows.Forms.Label lblMicrofoneSistema;
         private System.Windows.Forms.Label LabelJitterBufferClient;
         private System.Windows.Forms.NumericUpDown NumericUpDownJitterBufferClient;
-        private System.Windows.Forms.Button ButtonServerSpeak;
-        private System.Windows.Forms.Button ButtonServerListen;
-        private System.Windows.Forms.Button ButtonClientListen;
+        private System.Windows.Forms.Button btnServidorMic;
+        private System.Windows.Forms.Button btnServidorAudio;
+        private System.Windows.Forms.Button btncClienteAudio;
         private System.Windows.Forms.FlowLayoutPanel FlowLayoutPanelServerListen;
         private System.Windows.Forms.FlowLayoutPanel FlowLayoutPanelServerSpeak;
-        private System.Windows.Forms.Button ButtonClientSpeak;
+        private System.Windows.Forms.Button btnClienteMic;
         private System.Windows.Forms.ProgressBar ProgressBarPlayingClient;
-        private System.Windows.Forms.Button btnCamera;
+        private System.Windows.Forms.Button btnClienteCamera;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button btnEnviarMsg;

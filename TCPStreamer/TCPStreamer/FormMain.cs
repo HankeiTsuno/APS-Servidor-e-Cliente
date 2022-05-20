@@ -1,38 +1,36 @@
-﻿using System;
+﻿using ServCli;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using System.Xml.Serialization;
-using System.IO;
-using System.Collections;
-using System.Threading;
-
+using WinSound;
 
 namespace TCPStreamer
 {
     public partial class FormMain : Form
     {
-        /// <summary>
-        /// Konstruktor
-        /// </summary>
+        private delegate void AtualizaStatusCallback(string strMensagem);
+
         public FormMain()
         {
             InitializeComponent();
             Init();
         }
 
-        //Attribute
-        private NF.TCPClient m_Client;
-        private NF.TCPServer m_Server;
+        private ServCli.TCPClientVoz m_Client;
+        private ServCli.TCPServidorVoz m_Server;
         private Configuration m_Config = new Configuration();
         private String m_ConfigFileName = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "config.xml");
         private int m_SoundBufferCount = 8;
         private WinSound.Protocol m_PrototolClient = new WinSound.Protocol(WinSound.ProtocolTypes.LH, Encoding.Default);
-        private Dictionary<NF.ServerThread, ServerThreadData> m_DictionaryServerDatas = new Dictionary<NF.ServerThread, ServerThreadData>();
+        private Dictionary<ServCli.ServerThread, ServerThreadData> m_DictionaryServerDatas = new Dictionary<ServCli.ServerThread, ServerThreadData>();
         private WinSound.Recorder m_Recorder_Client;
         private WinSound.Recorder m_Recorder_Server;
         private WinSound.Player m_PlayerClient;
@@ -74,9 +72,7 @@ namespace TCPStreamer
 
         private delegate void FechaConexaoCallBack(string strMotivo);
 
-        /// <summary>
-        /// Init
-        /// </summary>
+
         private void Init()
         {
             try
@@ -89,16 +85,13 @@ namespace TCPStreamer
                 InitJitterBufferServerRecording();
                 InitTimerShowProgressBarPlayingClient();
                 InitProtocolClient();
-
             }
             catch (Exception ex)
             {
                 ShowError(LabelClient, ex.Message);
             }
         }
-        /// <summary>
-        /// InitProtocolClient
-        /// </summary>
+
         private void InitProtocolClient()
         {
             if (m_PrototolClient != null)
@@ -106,29 +99,15 @@ namespace TCPStreamer
                 m_PrototolClient.DataComplete += new WinSound.Protocol.DelegateDataComplete(OnProtocolClient_DataComplete);
             }
         }
-        /// <summary>
-        /// FillRTPBufferWithPayloadData
-        /// </summary>
-        /// <param name="header"></param>
-        private void FillRTPBufferWithPayloadData(WinSound.WaveFileHeader header)
-        {
-            m_RTPPartsLength = WinSound.Utils.GetBytesPerInterval(header.SamplesPerSecond, header.BitsPerSample, header.Channels);
-            m_FilePayloadBuffer = header.Payload;
-        }
-        /// <summary>
-        /// InitTimerShowProgressBarPlayingClient
-        /// </summary>
+
+
+
         private void InitTimerShowProgressBarPlayingClient()
         {
             m_TimerProgressBarPlayingClient = new System.Windows.Forms.Timer();
             m_TimerProgressBarPlayingClient.Interval = 60;
             m_TimerProgressBarPlayingClient.Tick += new EventHandler(OnTimerProgressPlayingClient);
         }
-        /// <summary>
-        /// OnTimerProgressPlayingClient
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="e"></param>
         private void OnTimerProgressPlayingClient(Object obj, EventArgs e)
         {
             try
@@ -144,16 +123,11 @@ namespace TCPStreamer
                 m_TimerProgressBarPlayingClient.Stop();
             }
         }
-        /// <summary>
-        /// OnTimerSendMixedDataToAllClients
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="e"></param>
+
         private void OnTimerSendMixedDataToAllClients()
         {
             try
             {
-                //Liste mit allen Sprachdaten (eigene + Clients)
                 Dictionary<Object, List<Byte>> dic = new Dictionary<object, List<byte>>();
                 List<List<byte>> listlist = new List<List<byte>>();
                 Dictionary<Object, Queue<List<Byte>>> copy = new Dictionary<object, Queue<List<byte>>>(FormMain.DictionaryMixed);
@@ -164,7 +138,6 @@ namespace TCPStreamer
 
                         q = copy[obj];
 
-                        //Wenn Daten vorhanden
                         if (q.Count > 0)
                         {
                             dic[obj] = q.Dequeue();
@@ -175,33 +148,25 @@ namespace TCPStreamer
 
                 if (listlist.Count > 0)
                 {
-                    //Gemischte Sprachdaten
                     Byte[] mixedBytes = WinSound.Mixer.MixBytes(listlist, m_Config.BitsPerSampleServer).ToArray();
                     List<Byte> listMixed = new List<Byte>(mixedBytes);
 
-                    //Für alle Clients
-                    foreach (NF.ServerThread client in m_Server.Clients)
+                    foreach (ServCli.ServerThread client in m_Server.Clients)
                     {
-                        //Wenn nicht stumm
                         if (client.IsMute == false)
                         {
-                            //Gemixte Sprache für Client
                             Byte[] mixedBytesClient = mixedBytes;
 
                             if (dic.ContainsKey(client))
                             {
-                                //Sprache des Clients ermitteln
                                 List<Byte> listClient = dic[client];
 
-                                //Sprache des Clients aus Mix subtrahieren
                                 mixedBytesClient = WinSound.Mixer.SubsctractBytes_16Bit(listMixed, listClient).ToArray();
                             }
 
-                            //RTP Packet erstellen
                             WinSound.RTPPacket rtp = ToRTPPacket(mixedBytesClient, m_Config.BitsPerSampleServer, m_Config.ChannelsServer);
                             Byte[] rtpBytes = rtp.ToBytes();
 
-                            //Absenden
                             client.Send(m_PrototolClient.ToBytes(rtpBytes));
                         }
                     }
@@ -214,54 +179,39 @@ namespace TCPStreamer
                 m_TimerProgressBarPlayingClient.Stop();
             }
         }
-        /// <summary>
-        /// InitJitterBufferClientRecording
-        /// </summary>
         private void InitJitterBufferClientRecording()
         {
-            //Wenn vorhanden
             if (m_JitterBufferClientRecording != null)
             {
                 m_JitterBufferClientRecording.DataAvailable -= new WinSound.JitterBuffer.DelegateDataAvailable(OnJitterBufferClientDataAvailableRecording);
             }
 
-            //Neu erstellen
             m_JitterBufferClientRecording = new WinSound.JitterBuffer(null, RecordingJitterBufferCount, 20);
             m_JitterBufferClientRecording.DataAvailable += new WinSound.JitterBuffer.DelegateDataAvailable(OnJitterBufferClientDataAvailableRecording);
         }
-        /// <summary>
-        /// InitJitterBufferClientPlaying
-        /// </summary>
+
         private void InitJitterBufferClientPlaying()
         {
-            //Wenn vorhanden
             if (m_JitterBufferClientPlaying != null)
             {
                 m_JitterBufferClientPlaying.DataAvailable -= new WinSound.JitterBuffer.DelegateDataAvailable(OnJitterBufferClientDataAvailablePlaying);
             }
 
-            //Neu erstellen
             m_JitterBufferClientPlaying = new WinSound.JitterBuffer(null, m_Config.JitterBufferCountClient, 20);
             m_JitterBufferClientPlaying.DataAvailable += new WinSound.JitterBuffer.DelegateDataAvailable(OnJitterBufferClientDataAvailablePlaying);
         }
-        /// <summary>
-        /// InitJitterBuffer
-        /// </summary>
+
         private void InitJitterBufferServerRecording()
         {
-            //Wenn vorhanden
             if (m_JitterBufferServerRecording != null)
             {
                 m_JitterBufferServerRecording.DataAvailable -= new WinSound.JitterBuffer.DelegateDataAvailable(OnJitterBufferServerDataAvailable);
             }
 
-            //Neu erstellen
             m_JitterBufferServerRecording = new WinSound.JitterBuffer(null, RecordingJitterBufferCount, 20);
             m_JitterBufferServerRecording.DataAvailable += new WinSound.JitterBuffer.DelegateDataAvailable(OnJitterBufferServerDataAvailable);
         }
-        /// <summary>
-        /// UseJitterBuffer
-        /// </summary>
+
         private bool UseJitterBufferServer
         {
             get
@@ -269,9 +219,7 @@ namespace TCPStreamer
                 return m_Config.JitterBufferCountServer >= 2;
             }
         }
-        /// <summary>
-        /// UseJitterBuffer
-        /// </summary>
+
         private bool UseJitterBufferClientRecording
         {
             get
@@ -279,9 +227,7 @@ namespace TCPStreamer
                 return m_Config.UseJitterBufferClientRecording;
             }
         }
-        /// <summary>
-        /// UseJitterBufferServerRecording
-        /// </summary>
+
         private bool UseJitterBufferServerRecording
         {
             get
@@ -289,16 +235,13 @@ namespace TCPStreamer
                 return m_Config.UseJitterBufferServerRecording;
             }
         }
-        /// <summary>
-        /// StartRecordingFromSounddevice_Client
-        /// </summary>
+
         private void StartRecordingFromSounddevice_Client()
         {
             try
             {
                 if (IsRecorderFromSounddeviceStarted_Client == false)
                 {
-                    //Buffer Grösse berechnen
                     int bufferSize = 0;
                     if (UseJitterBufferClientRecording)
                     {
@@ -309,23 +252,17 @@ namespace TCPStreamer
                         bufferSize = WinSound.Utils.GetBytesPerInterval((uint)m_Config.SamplesPerSecondClient, m_Config.BitsPerSampleClient, m_Config.ChannelsClient);
                     }
 
-                    //Wenn Buffer korrekt
                     if (bufferSize > 0)
                     {
-                        //Recorder erstellen
                         m_Recorder_Client = new WinSound.Recorder();
 
-                        //Events hinzufügen
                         m_Recorder_Client.DataRecorded += new WinSound.Recorder.DelegateDataRecorded(OnDataReceivedFromSoundcard_Client);
                         m_Recorder_Client.RecordingStopped += new WinSound.Recorder.DelegateStopped(OnRecordingStopped_Client);
 
-                        //Recorder starten
                         if (m_Recorder_Client.Start(m_Config.SoundInputDeviceNameClient, m_Config.SamplesPerSecondClient, m_Config.BitsPerSampleClient, m_Config.ChannelsClient, m_SoundBufferCount, bufferSize))
                         {
-                            //Anzeigen
                             ShowStreamingFromSounddeviceStarted_Client();
 
-                            //Wenn JitterBuffer
                             if (UseJitterBufferClientRecording)
                             {
                                 m_JitterBufferClientRecording.Start();
@@ -340,16 +277,12 @@ namespace TCPStreamer
                 ShowError(LabelClient, ex.Message);
             }
         }
-        /// <summary>
-        /// StartRecordingFromSounddevice_Server
-        /// </summary>
         private void StartRecordingFromSounddevice_Server()
         {
             try
             {
                 if (IsRecorderFromSounddeviceStarted_Server == false)
                 {
-                    //Buffer Grösse berechnen
                     int bufferSize = 0;
                     if (UseJitterBufferServerRecording)
                     {
@@ -360,26 +293,19 @@ namespace TCPStreamer
                         bufferSize = WinSound.Utils.GetBytesPerInterval((uint)m_Config.SamplesPerSecondServer, m_Config.BitsPerSampleServer, m_Config.ChannelsServer);
                     }
 
-                    //Wenn Buffer korrekt
                     if (bufferSize > 0)
                     {
-                        //Recorder erstellen
                         m_Recorder_Server = new WinSound.Recorder();
 
-                        //Events hinzufügen
                         m_Recorder_Server.DataRecorded += new WinSound.Recorder.DelegateDataRecorded(OnDataReceivedFromSoundcard_Server);
                         m_Recorder_Server.RecordingStopped += new WinSound.Recorder.DelegateStopped(OnRecordingStopped_Server);
 
-                        //Recorder starten
                         if (m_Recorder_Server.Start(m_Config.SoundInputDeviceNameServer, m_Config.SamplesPerSecondServer, m_Config.BitsPerSampleServer, m_Config.ChannelsServer, m_SoundBufferCount, bufferSize))
                         {
-                            //Anzeigen
                             ShowStreamingFromSounddeviceStarted_Server();
 
-                            //Zu Mixer hinzufügen
                             FormMain.DictionaryMixed[this] = new Queue<List<byte>>();
 
-                            //JitterBuffer starten
                             m_JitterBufferServerRecording.Start();
                         }
                     }
@@ -391,30 +317,23 @@ namespace TCPStreamer
                 ShowError(LabelClient, ex.Message);
             }
         }
-        /// <summary>
-        /// StopRecordingFromSounddevice_Client
-        /// </summary>
         private void StopRecordingFromSounddevice_Client()
         {
             try
             {
                 if (IsRecorderFromSounddeviceStarted_Client)
                 {
-                    //Stoppen
                     m_Recorder_Client.Stop();
 
-                    //Events entfernen
                     m_Recorder_Client.DataRecorded -= new WinSound.Recorder.DelegateDataRecorded(OnDataReceivedFromSoundcard_Client);
                     m_Recorder_Client.RecordingStopped -= new WinSound.Recorder.DelegateStopped(OnRecordingStopped_Client);
                     m_Recorder_Client = null;
 
-                    //Wenn JitterBuffer
                     if (UseJitterBufferClientRecording)
                     {
                         m_JitterBufferClientRecording.Stop();
                     }
 
-                    //Anzeigen
                     ShowStreamingFromSounddeviceStopped_Client();
                 }
             }
@@ -423,27 +342,20 @@ namespace TCPStreamer
                 ShowError(LabelClient, ex.Message);
             }
         }
-        /// <summary>
-        /// StopRecordingFromSounddevice_Server
-        /// </summary>
         private void StopRecordingFromSounddevice_Server()
         {
             try
             {
                 if (IsRecorderFromSounddeviceStarted_Server)
                 {
-                    //Stoppen
                     m_Recorder_Server.Stop();
 
-                    //Events entfernen
                     m_Recorder_Server.DataRecorded -= new WinSound.Recorder.DelegateDataRecorded(OnDataReceivedFromSoundcard_Server);
                     m_Recorder_Server.RecordingStopped -= new WinSound.Recorder.DelegateStopped(OnRecordingStopped_Server);
                     m_Recorder_Server = null;
 
-                    //JitterBuffer beenden
                     m_JitterBufferServerRecording.Stop();
 
-                    //Anzeigen
                     ShowStreamingFromSounddeviceStopped_Server();
                 }
             }
@@ -452,16 +364,12 @@ namespace TCPStreamer
                 ShowError(LabelClient, ex.Message);
             }
         }
-        /// <summary>
-        /// OnRecordingStopped
-        /// </summary>
         private void OnRecordingStopped_Client()
         {
             try
             {
                 this.Invoke(new MethodInvoker(delegate ()
                 {
-                    //Anzeigen
                     ShowStreamingFromSounddeviceStopped_Client();
 
                 }));
@@ -471,16 +379,12 @@ namespace TCPStreamer
                 ShowError(LabelClient, ex.Message);
             }
         }
-        /// <summary>
-        /// OnRecordingStopped_Server
-        /// </summary>
         private void OnRecordingStopped_Server()
         {
             try
             {
                 this.Invoke(new MethodInvoker(delegate ()
                 {
-                    //Anzeigen
                     ShowStreamingFromSounddeviceStopped_Server();
 
                 }));
@@ -490,10 +394,6 @@ namespace TCPStreamer
                 ShowError(LabelClient, ex.Message);
             }
         }
-        /// <summary>
-        /// OnDataReceivedFromSoundcard_Client
-        /// </summary>
-        /// <param name="linearData"></param>
         private void OnDataReceivedFromSoundcard_Client(Byte[] data)
         {
             try
@@ -502,32 +402,26 @@ namespace TCPStreamer
                 {
                     if (IsClientConnected)
                     {
-                        //Wenn gewünscht
                         if (m_Config.ClientNoSpeakAll == false)
                         {
-                            //Sounddaten in kleinere Einzelteile zerlegen
+
                             int bytesPerInterval = WinSound.Utils.GetBytesPerInterval((uint)m_Config.SamplesPerSecondClient, m_Config.BitsPerSampleClient, m_Config.ChannelsClient);
                             int count = data.Length / bytesPerInterval;
                             int currentPos = 0;
                             for (int i = 0; i < count; i++)
                             {
-                                //Teilstück in RTP Packet umwandeln
                                 Byte[] partBytes = new Byte[bytesPerInterval];
                                 Array.Copy(data, currentPos, partBytes, 0, bytesPerInterval);
                                 currentPos += bytesPerInterval;
                                 WinSound.RTPPacket rtp = ToRTPPacket(partBytes, m_Config.BitsPerSampleClient, m_Config.ChannelsClient);
 
-                                //Wenn JitterBuffer
                                 if (UseJitterBufferClientRecording)
                                 {
-                                    //In Buffer legen
                                     m_JitterBufferClientRecording.AddData(rtp);
                                 }
                                 else
                                 {
-                                    //Alles in RTP Packet umwandeln
                                     Byte[] rtpBytes = ToRTPData(data, m_Config.BitsPerSampleClient, m_Config.ChannelsClient);
-                                    //Absenden
                                     m_Client.Send(m_PrototolClient.ToBytes(rtpBytes));
                                 }
                             }
@@ -540,10 +434,6 @@ namespace TCPStreamer
                 System.Diagnostics.Debug.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// OnDataReceivedFromSoundcard_Server
-        /// </summary>
-        /// <param name="data"></param>
         private void OnDataReceivedFromSoundcard_Server(Byte[] data)
         {
             try
@@ -552,28 +442,21 @@ namespace TCPStreamer
                 {
                     if (IsServerRunning)
                     {
-                        //Wenn Form noch aktiv
                         if (m_IsFormMain)
                         {
-                            //Wenn gewünscht
                             if (m_Config.ServerNoSpeakAll == false)
                             {
-                                //Sounddaten in kleinere Einzelteile zerlegen
                                 int bytesPerInterval = WinSound.Utils.GetBytesPerInterval((uint)m_Config.SamplesPerSecondServer, m_Config.BitsPerSampleServer, m_Config.ChannelsServer);
                                 int count = data.Length / bytesPerInterval;
                                 int currentPos = 0;
                                 for (int i = 0; i < count; i++)
                                 {
-                                    //Teilstück in RTP Packet umwandeln
                                     Byte[] partBytes = new Byte[bytesPerInterval];
                                     Array.Copy(data, currentPos, partBytes, 0, bytesPerInterval);
                                     currentPos += bytesPerInterval;
-
-                                    //Wenn Buffer nicht zu gross
                                     Queue<List<Byte>> q = FormMain.DictionaryMixed[this];
                                     if (q.Count < 10)
                                     {
-                                        //Daten In Mixer legen
                                         q.Enqueue(new List<Byte>(partBytes));
                                     }
                                 }
@@ -587,24 +470,18 @@ namespace TCPStreamer
                 System.Diagnostics.Debug.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// OnJitterBufferClientDataAvailable
-        /// </summary>
-        /// <param name="rtp"></param>
         private void OnJitterBufferClientDataAvailableRecording(Object sender, WinSound.RTPPacket rtp)
         {
             try
             {
-                //Prüfen
                 if (rtp != null && m_Client != null && rtp.Data != null && rtp.Data.Length > 0)
                 {
                     if (IsClientConnected)
                     {
                         if (m_IsFormMain)
                         {
-                            //RTP Packet in Bytes umwandeln
+
                             Byte[] rtpBytes = rtp.ToBytes();
-                            //Absenden
                             m_Client.Send(m_PrototolClient.ToBytes(rtpBytes));
                         }
                     }
@@ -616,11 +493,6 @@ namespace TCPStreamer
                 ShowError(LabelClient, String.Format("Exception: {0} StackTrace: {1}. FileName: {2} Method: {3} Line: {4}", ex.Message, ex.StackTrace, sf.GetFileName(), sf.GetMethod(), sf.GetFileLineNumber()));
             }
         }
-        /// <summary>
-        /// OnJitterBufferClientDataAvailablePlaying
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="rtp"></param>
         private void OnJitterBufferClientDataAvailablePlaying(Object sender, WinSound.RTPPacket rtp)
         {
             try
@@ -631,12 +503,10 @@ namespace TCPStreamer
                     {
                         if (m_IsFormMain)
                         {
-                            //Wenn nicht stumm
                             if (m_Config.MuteClientPlaying == false)
                             {
-                                //Nach Linear umwandeln
                                 Byte[] linearBytes = WinSound.Utils.MuLawToLinear(rtp.Data, m_Config.BitsPerSampleClient, m_Config.ChannelsClient);
-                                //Abspielen
+
                                 m_PlayerClient.PlayData(linearBytes, false);
                             }
                         }
@@ -649,10 +519,6 @@ namespace TCPStreamer
                 ShowError(LabelClient, String.Format("Exception: {0} StackTrace: {1}. FileName: {2} Method: {3} Line: {4}", ex.Message, ex.StackTrace, sf.GetFileName(), sf.GetMethod(), sf.GetFileLineNumber()));
             }
         }
-        /// <summary>
-        /// OnJitterBufferServerDataAvailable
-        /// </summary>
-        /// <param name="rtp"></param>
         private void OnJitterBufferServerDataAvailable(Object sender, WinSound.RTPPacket rtp)
         {
             try
@@ -661,24 +527,19 @@ namespace TCPStreamer
                 {
                     if (m_IsFormMain)
                     {
-                        //RTP Packet in Bytes umwandeln
                         Byte[] rtpBytes = rtp.ToBytes();
 
-                        //Für alle Clients
-                        List<NF.ServerThread> list = new List<NF.ServerThread>(m_Server.Clients);
-                        foreach (NF.ServerThread client in list)
+                        List<ServCli.ServerThread> list = new List<ServCli.ServerThread>(m_Server.Clients);
+                        foreach (ServCli.ServerThread client in list)
                         {
-                            //Wenn nicht Mute
                             if (client.IsMute == false)
                             {
                                 try
                                 {
-                                    //Absenden
                                     client.Send(m_PrototolClient.ToBytes(rtpBytes));
                                 }
                                 catch (Exception)
                                 {
-                                    //Eintrag löschen
                                     RemoveControlInAllFlowLayoutPanelsByServerThread(client);
                                 }
                             }
@@ -689,41 +550,23 @@ namespace TCPStreamer
             catch (Exception ex)
             {
                 System.Diagnostics.StackFrame sf = new System.Diagnostics.StackFrame(true);
-                ShowError(LabelServer, String.Format("Exception: {0} StackTrace: {1}. FileName: {2} Method: {3} Line: {4}", ex.Message, ex.StackTrace, sf.GetFileName(), sf.GetMethod(), sf.GetFileLineNumber()));
+                ShowError(lblLogServer, String.Format("Exception: {0} StackTrace: {1}. FileName: {2} Method: {3} Line: {4}", ex.Message, ex.StackTrace, sf.GetFileName(), sf.GetMethod(), sf.GetFileLineNumber()));
             }
         }
-        /// <summary>
-        /// ToRTPData
-        /// </summary>
-        /// <param name="linearData"></param>
-        /// <param name="bitsPerSample"></param>
-        /// <param name="channels"></param>
-        /// <returns></returns>
         private Byte[] ToRTPData(Byte[] data, int bitsPerSample, int channels)
         {
-            //Neues RTP Packet erstellen
             WinSound.RTPPacket rtp = ToRTPPacket(data, bitsPerSample, channels);
-            //RTPHeader in Bytes erstellen
+
             Byte[] rtpBytes = rtp.ToBytes();
-            //Fertig
+
             return rtpBytes;
         }
-        /// <summary>
-        /// ToRTPPacket
-        /// </summary>
-        /// <param name="linearData"></param>
-        /// <param name="bitsPerSample"></param>
-        /// <param name="channels"></param>
-        /// <returns></returns>
         private WinSound.RTPPacket ToRTPPacket(Byte[] linearData, int bitsPerSample, int channels)
         {
-            //Daten Nach MuLaw umwandeln
             Byte[] mulaws = WinSound.Utils.LinearToMulaw(linearData, bitsPerSample, channels);
 
-            //Neues RTP Packet erstellen
             WinSound.RTPPacket rtp = new WinSound.RTPPacket();
 
-            //Werte übernehmen
             rtp.Data = mulaws;
             rtp.CSRCCount = m_CSRCCount;
             rtp.Extension = m_Extension;
@@ -734,7 +577,6 @@ namespace TCPStreamer
             rtp.Version = m_Version;
             rtp.SourceId = m_SourceId;
 
-            //RTP Header aktualisieren
             try
             {
                 rtp.SequenceNumber = Convert.ToUInt16(m_SequenceNumber);
@@ -754,12 +596,8 @@ namespace TCPStreamer
                 m_TimeStamp = 0;
             }
 
-            //Fertig
             return rtp;
         }
-        /// <summary>
-        /// IsRecorderStarted
-        /// </summary>
         private bool IsRecorderFromSounddeviceStarted_Client
         {
             get
@@ -771,9 +609,6 @@ namespace TCPStreamer
                 return false;
             }
         }
-        /// <summary>
-        /// IsRecorderFromSounddeviceStarted_Server
-        /// </summary>
         private bool IsRecorderFromSounddeviceStarted_Server
         {
             get
@@ -785,17 +620,11 @@ namespace TCPStreamer
                 return false;
             }
         }
-        /// <summary>
-        /// InitComboboxes
-        /// </summary>
         private void InitComboboxes()
         {
             InitComboboxesClient();
             InitComboboxesServer();
         }
-        /// <summary>
-        /// InitComboboxesClient
-        /// </summary>
         private void InitComboboxesClient()
         {
             ComboboxOutputSoundDeviceNameClient.Items.Clear();
@@ -803,32 +632,26 @@ namespace TCPStreamer
             List<String> playbackNames = WinSound.WinSound.GetPlaybackNames();
             List<String> recordingNames = WinSound.WinSound.GetRecordingNames();
 
-            //Output
             ComboboxOutputSoundDeviceNameClient.Items.Add("None");
             foreach (String name in playbackNames.Where(x => x != null))
             {
                 ComboboxOutputSoundDeviceNameClient.Items.Add(name);
             }
-            //Input
             foreach (String name in recordingNames.Where(x => x != null))
             {
                 ComboboxInputSoundDeviceNameClient.Items.Add(name);
             }
 
-            //Output
             if (ComboboxOutputSoundDeviceNameClient.Items.Count > 0)
             {
                 ComboboxOutputSoundDeviceNameClient.SelectedIndex = 0;
             }
-            //Input
             if (ComboboxInputSoundDeviceNameClient.Items.Count > 0)
             {
                 ComboboxInputSoundDeviceNameClient.SelectedIndex = 0;
             }
         }
-        /// <summary>
-        /// InitComboboxesServer
-        /// </summary>
+
         private void InitComboboxesServer()
         {
             ComboboxOutputSoundDeviceNameServer.Items.Clear();
@@ -836,46 +659,38 @@ namespace TCPStreamer
             List<String> playbackNames = WinSound.WinSound.GetPlaybackNames();
             List<String> recordingNames = WinSound.WinSound.GetRecordingNames();
 
-            //Output
             foreach (String name in playbackNames.Where(x => x != null))
             {
                 ComboboxOutputSoundDeviceNameServer.Items.Add(name);
             }
-            //Input
             foreach (String name in recordingNames.Where(x => x != null))
             {
                 ComboboxInputSoundDeviceNameServer.Items.Add(name);
             }
 
-            //Output
             if (ComboboxOutputSoundDeviceNameServer.Items.Count > 0)
             {
                 ComboboxOutputSoundDeviceNameServer.SelectedIndex = 0;
             }
-            //Input
             if (ComboboxInputSoundDeviceNameServer.Items.Count > 0)
             {
                 ComboboxInputSoundDeviceNameServer.SelectedIndex = 0;
             }
         }
 
-        /// <summary>
-        /// ConnectClient
-        /// </summary>
         private void ConnectClient()
         {
             try
             {
                 if (IsClientConnected == false)
                 {
-                    //Wenn Eingabe vorhanden
                     if (m_Config.IpAddressClient.Length > 0 && m_Config.PortClient > 0)
                     {
-                        m_Client = new NF.TCPClient(m_Config.IpAddressClient, m_Config.PortClient);
-                        m_Client.ClientConnected += new NF.TCPClient.DelegateConnection(OnClientConnected);
-                        m_Client.ClientDisconnected += new NF.TCPClient.DelegateConnection(OnClientDisconnected);
-                        m_Client.ExceptionAppeared += new NF.TCPClient.DelegateException(OnClientExceptionAppeared);
-                        m_Client.DataReceived += new NF.TCPClient.DelegateDataReceived(OnClientDataReceived);
+                        m_Client = new ServCli.TCPClientVoz(m_Config.IpAddressClient, m_Config.PortClient);
+                        m_Client.ClientConnected += new ServCli.TCPClientVoz.DelegateConnection(OnClientConnected);
+                        m_Client.ClientDisconnected += new ServCli.TCPClientVoz.DelegateConnection(OnClientDisconnected);
+                        m_Client.ExceptionAppeared += new ServCli.TCPClientVoz.DelegateException(OnClientExceptionAppeared);
+                        m_Client.DataReceived += new ServCli.TCPClientVoz.DelegateDataReceived(OnClientDataReceived);
                         m_Client.Connect();
                     }
                 }
@@ -886,24 +701,19 @@ namespace TCPStreamer
                 ShowError(LabelClient, ex.Message);
             }
         }
-        /// <summary>
-        /// DisconnectClient
-        /// </summary>
         private void DisconnectClient()
         {
             try
             {
-                //Aufnahme beenden
                 StopRecordingFromSounddevice_Client();
 
                 if (m_Client != null)
                 {
-                    //Client beenden
                     m_Client.Disconnect();
-                    m_Client.ClientConnected -= new NF.TCPClient.DelegateConnection(OnClientConnected);
-                    m_Client.ClientDisconnected -= new NF.TCPClient.DelegateConnection(OnClientDisconnected);
-                    m_Client.ExceptionAppeared -= new NF.TCPClient.DelegateException(OnClientExceptionAppeared);
-                    m_Client.DataReceived -= new NF.TCPClient.DelegateDataReceived(OnClientDataReceived);
+                    m_Client.ClientConnected -= new ServCli.TCPClientVoz.DelegateConnection(OnClientConnected);
+                    m_Client.ClientDisconnected -= new ServCli.TCPClientVoz.DelegateConnection(OnClientDisconnected);
+                    m_Client.ExceptionAppeared -= new ServCli.TCPClientVoz.DelegateException(OnClientExceptionAppeared);
+                    m_Client.DataReceived -= new ServCli.TCPClientVoz.DelegateDataReceived(OnClientDataReceived);
                     m_Client = null;
                 }
             }
@@ -912,9 +722,6 @@ namespace TCPStreamer
                 ShowError(LabelClient, ex.Message);
             }
         }
-        /// <summary>
-        /// StartServer
-        /// </summary>
         private void StartServer()
         {
             try
@@ -923,14 +730,14 @@ namespace TCPStreamer
                 {
                     if (m_Config.IPAddressServer.Length > 0 && m_Config.PortServer > 0)
                     {
-                        m_Server = new NF.TCPServer();
-                        m_Server.ClientConnected += new NF.TCPServer.DelegateClientConnected(OnServerClientConnected);
-                        m_Server.ClientDisconnected += new NF.TCPServer.DelegateClientDisconnected(OnServerClientDisconnected);
-                        m_Server.DataReceived += new NF.TCPServer.DelegateDataReceived(OnServerDataReceived);
+                        m_Server = new ServCli.TCPServidorVoz();
+                        m_Server.ClientConnected += new ServCli.TCPServidorVoz.DelegateClientConnected(OnServerClientConnected);
+                        m_Server.ClientDisconnected += new ServCli.TCPServidorVoz.DelegateClientDisconnected(OnServerClientDisconnected);
+                        m_Server.DataReceived += new ServCli.TCPServidorVoz.DelegateDataReceived(OnServerDataReceived);
                         m_Server.Start(m_Config.IPAddressServer, m_Config.PortServer);
 
                         //Je nach Server Status
-                        if (m_Server.State == NF.TCPServer.ListenerState.Started)
+                        if (m_Server.State == ServCli.TCPServidorVoz.ListenerState.Started)
                         {
                             ShowServerStarted();
                         }
@@ -943,33 +750,27 @@ namespace TCPStreamer
             }
             catch (Exception ex)
             {
-                ShowError(LabelServer, ex.Message);
+                ShowError(lblLogServer, ex.Message);
             }
         }
-        /// <summary>
-        /// StopServer
-        /// </summary>
         private void StopServer()
         {
             try
             {
-                if (IsServerRunning == true)
+                if (IsServerRunning)
                 {
 
-                    //Player beenden
                     DeleteAllServerThreadDatas();
 
-                    //Server beenden
                     m_Server.Stop();
-                    m_Server.ClientConnected -= new NF.TCPServer.DelegateClientConnected(OnServerClientConnected);
-                    m_Server.ClientDisconnected -= new NF.TCPServer.DelegateClientDisconnected(OnServerClientDisconnected);
-                    m_Server.DataReceived -= new NF.TCPServer.DelegateDataReceived(OnServerDataReceived);
+                    m_Server.ClientConnected -= new ServCli.TCPServidorVoz.DelegateClientConnected(OnServerClientConnected);
+                    m_Server.ClientDisconnected -= new ServCli.TCPServidorVoz.DelegateClientDisconnected(OnServerClientDisconnected);
+                    m_Server.DataReceived -= new ServCli.TCPServidorVoz.DelegateDataReceived(OnServerDataReceived);
                 }
 
-                //Je nach Server Status
                 if (m_Server != null)
                 {
-                    if (m_Server.State == NF.TCPServer.ListenerState.Started)
+                    if (m_Server.State == ServCli.TCPServidorVoz.ListenerState.Started)
                     {
                         ShowServerStarted();
                     }
@@ -979,63 +780,41 @@ namespace TCPStreamer
                     }
                 }
 
-                //Fertig
                 m_Server = null;
             }
             catch (Exception ex)
             {
-                ShowError(LabelServer, ex.Message);
+                ShowError(lblLogServer, ex.Message);
             }
         }
-        /// <summary>
-        /// OnClientConnected
-        /// </summary>
-        /// <param name="client"></param>
-        /// <param name="info"></param>
-        private void OnClientConnected(NF.TCPClient client, string info)
+        private void OnClientConnected(ServCli.TCPClientVoz client, string info)
         {
             ShowMessage(LabelClient, String.Format("Client connected {0}", ""));
             ShowClientConnected();
         }
-        /// <summary>
-        /// OnClientDisconnected
-        /// </summary>
-        /// <param name="client"></param>
-        /// <param name="info"></param>
-        private void OnClientDisconnected(NF.TCPClient client, string info)
+        private void OnClientDisconnected(ServCli.TCPClientVoz client, string info)
         {
-            //Abspielen beenden
             StopPlayingToSounddevice_Client();
-            //Streamen von Sounddevice beenden
+
             StopRecordingFromSounddevice_Client();
 
             if (m_Client != null)
             {
-                m_Client.ClientConnected -= new NF.TCPClient.DelegateConnection(OnClientConnected);
-                m_Client.ClientDisconnected -= new NF.TCPClient.DelegateConnection(OnClientDisconnected);
-                m_Client.ExceptionAppeared -= new NF.TCPClient.DelegateException(OnClientExceptionAppeared);
-                m_Client.DataReceived -= new NF.TCPClient.DelegateDataReceived(OnClientDataReceived);
+                m_Client.ClientConnected -= new ServCli.TCPClientVoz.DelegateConnection(OnClientConnected);
+                m_Client.ClientDisconnected -= new ServCli.TCPClientVoz.DelegateConnection(OnClientDisconnected);
+                m_Client.ExceptionAppeared -= new ServCli.TCPClientVoz.DelegateException(OnClientExceptionAppeared);
+                m_Client.DataReceived -= new ServCli.TCPClientVoz.DelegateDataReceived(OnClientDataReceived);
                 ShowMessage(LabelClient, String.Format("Client disconnected {0}", ""));
             }
 
             ShowClientDisconnected();
         }
-        /// <summary>
-        /// OnClientExceptionAppeared
-        /// </summary>
-        /// <param name="client"></param>
-        /// <param name="ex"></param>
-        private void OnClientExceptionAppeared(NF.TCPClient client, Exception ex)
+        private void OnClientExceptionAppeared(ServCli.TCPClientVoz client, Exception ex)
         {
             DisconnectClient();
             ShowError(LabelClient, ex.Message);
         }
-        /// <summary>
-        /// OnClientDataReceived
-        /// </summary>
-        /// <param name="client"></param>
-        /// <param name="bytes"></param>
-        private void OnClientDataReceived(NF.TCPClient client, Byte[] bytes)
+        private void OnClientDataReceived(ServCli.TCPClientVoz client, Byte[] bytes)
         {
             try
             {
@@ -1049,27 +828,18 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// OnProtocolClient_DataComplete
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="data"></param>
         private void OnProtocolClient_DataComplete(Object sender, Byte[] data)
         {
             try
             {
-                //Wenn der Player gestartet wurde
                 if (m_PlayerClient != null)
                 {
                     if (m_PlayerClient.Opened)
                     {
-                        //RTP Header auslesen
                         WinSound.RTPPacket rtp = new WinSound.RTPPacket(data);
 
-                        //Wenn Header korrekt
                         if (rtp.Data != null)
                         {
-                            //In JitterBuffer hinzufügen
                             if (m_JitterBufferClientPlaying != null)
                             {
                                 m_JitterBufferClientPlaying.AddData(rtp);
@@ -1079,7 +849,6 @@ namespace TCPStreamer
                 }
                 else
                 {
-                    //Konfigurationsdaten erhalten
                     OnClientConfigReceived(sender, data);
                 }
             }
@@ -1088,11 +857,6 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// OnClientConfigReceived
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="data"></param>
         private void OnClientConfigReceived(Object sender, Byte[] data)
         {
             try
@@ -1100,11 +864,9 @@ namespace TCPStreamer
                 String msg = m_Encoding.GetString(data);
                 if (msg.Length > 0)
                 {
-                    //Parsen
                     String[] values = msg.Split(':');
                     String cmd = values[0];
 
-                    //Je nach Kommando
                     switch (cmd.ToUpper())
                     {
                         case "SAMPLESPERSECOND":
@@ -1113,7 +875,6 @@ namespace TCPStreamer
 
                             this.Invoke(new MethodInvoker(delegate ()
                             {
-                                //Aufnahme starten
                                 StartPlayingToSounddevice_Client();
                                 StartRecordingFromSounddevice_Client();
                             }));
@@ -1126,27 +887,21 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// OnServerClientConnected
-        /// </summary>
-        /// <param name="st"></param>
-        private void OnServerClientConnected(NF.ServerThread st)
+        private void OnServerClientConnected(ServCli.ServerThread st)
         {
             try
             {
-                //ServerThread Daten erstellen
                 ServerThreadData data = new ServerThreadData();
-                //Initialisieren
+
                 data.Init(st, m_Config.SoundOutputDeviceNameServer, m_Config.SamplesPerSecondServer, m_Config.BitsPerSampleServer, m_Config.ChannelsServer, m_SoundBufferCount, m_Config.JitterBufferCountServer, m_Milliseconds);
-                //Hinzufügen
+
                 m_DictionaryServerDatas[st] = data;
-                //Zu FlowLayoutPanels hinzufügen
+
                 AddServerClientToFlowLayoutPanel_ServerClient(st);
                 AddServerClientToFlowLayoutPanel_ServerProgressBars(data);
                 AddServerClientToFlowLayoutPanel_ServerListenButtons(data);
                 AddServerClientToFlowLayoutPanel_ServerSpeakButtons(data);
 
-                //Konfiguration senden
                 SendConfigurationToClient(data);
             }
             catch (Exception ex)
@@ -1154,43 +909,29 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// SendConfigurationToClient
-        /// </summary>
-        /// <param name="st"></param>
         private void SendConfigurationToClient(ServerThreadData data)
         {
             Byte[] bytesConfig = m_Encoding.GetBytes(String.Format("SamplesPerSecond:{0}", m_Config.SamplesPerSecondServer));
             data.ServerThread.Send(m_PrototolClient.ToBytes(bytesConfig));
         }
-        /// <summary>
-        /// OnServerClientDisconnected
-        /// </summary>
-        /// <param name="st"></param>
-        /// <param name="info"></param>
-        private void OnServerClientDisconnected(NF.ServerThread st, string info)
+        private void OnServerClientDisconnected(ServCli.ServerThread st, string info)
         {
             try
             {
-                //Wenn vorhanden
                 if (m_DictionaryServerDatas.ContainsKey(st))
                 {
-                    //Alle Daten freigeben
                     ServerThreadData data = m_DictionaryServerDatas[st];
                     data.Dispose();
                     lock (LockerDictionary)
                     {
-                        //Entfernen
                         m_DictionaryServerDatas.Remove(st);
                     }
-                    //Aus FlowLayoutPanels entfernen
                     RemoveServerClientToFlowLayoutPanel_ServerClient(st);
                     RemoveServerClientToFlowLayoutPanel_ServerProgressBar(data);
                     RemoveServerClientToFlowLayoutPanel_ButtonListen(data);
                     RemoveServerClientToFlowLayoutPanel_ButtonSpeak(data);
                 }
 
-                //Aus Mixdaten entfernen
                 FormMain.DictionaryMixed.Remove(st);
             }
             catch (Exception ex)
@@ -1198,9 +939,6 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// StartTimerMixed
-        /// </summary>
         private void StartTimerMixed()
         {
             if (m_TimerMixed == null)
@@ -1210,9 +948,6 @@ namespace TCPStreamer
                 m_TimerMixed.Start(20, 0);
             }
         }
-        /// <summary>
-        /// StopTimerMixed
-        /// </summary>
         private void StopTimerMixed()
         {
             if (m_TimerMixed != null)
@@ -1222,9 +957,6 @@ namespace TCPStreamer
                 m_TimerMixed = null;
             }
         }
-        /// <summary>
-        /// StartTimerDrawProgressBar
-        /// </summary>
         private void StartTimerDrawProgressBar()
         {
             if (m_TimerDrawProgressBar == null)
@@ -1235,9 +967,6 @@ namespace TCPStreamer
                 m_TimerDrawProgressBar.Start();
             }
         }
-        /// <summary>
-        ///StopTimerDrawCurve 
-        /// </summary>
         private void StopTimerDrawProgressBar()
         {
             try
@@ -1247,15 +976,12 @@ namespace TCPStreamer
                     m_TimerDrawProgressBar.Stop();
                     m_TimerDrawProgressBar = null;
 
-                    //Für jede ProgressBar
                     foreach (ProgressBar prog in FlowLayoutPanelServerProgressBars.Controls)
                     {
                         if (prog.Tag != null)
                         {
-                            //Daten ermitteln
                             ServerThreadData stData = (ServerThreadData)prog.Tag;
 
-                            //Wenn ein JitterBuffer vorhanden
                             if (stData.JitterBuffer != null)
                             {
                                 prog.Value = 0;
@@ -1269,24 +995,17 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// OnTimerDrawServerClientsProgressBars
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="e"></param>
+
         private void OnTimerDrawServerClientsProgressBars(Object obj, EventArgs e)
         {
             try
             {
-                //Für jede ProgressBar
                 foreach (ProgressBar prog in FlowLayoutPanelServerProgressBars.Controls)
                 {
                     if (prog.Tag != null)
                     {
-                        //Daten ermitteln
                         ServerThreadData stData = (ServerThreadData)prog.Tag;
 
-                        //Wenn ein JitterBuffer vorhanden
                         if (stData.JitterBuffer != null)
                         {
                             prog.Value = stData.JitterBuffer.Length;
@@ -1300,16 +1019,10 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// RemoveControlByTag
-        /// </summary>
-        /// <param name="controls"></param>
-        /// <param name="tag"></param>
         private void RemoveControlByTag(Control.ControlCollection controls, object tag)
         {
             this.Invoke(new MethodInvoker(delegate ()
             {
-                //Control anhand Tag ermitteln
                 Control existing = null;
                 foreach (Control ctrl in controls)
                 {
@@ -1320,26 +1033,21 @@ namespace TCPStreamer
                     }
                 }
 
-                //Wenn vorhanden
                 if (existing != null)
                 {
                     controls.Remove(existing);
                 }
             }));
         }
-        /// <summary>
-        /// RemoveControlInAllFlowLayoutPanelsByServerThread
-        /// </summary>
-        /// <param name="st"></param>
-        private void RemoveControlInAllFlowLayoutPanelsByServerThread(NF.ServerThread st)
+
+        private void RemoveControlInAllFlowLayoutPanelsByServerThread(ServCli.ServerThread st)
         {
             this.Invoke(new MethodInvoker(delegate ()
             {
-                //Label
                 Control ctrlLabel = null;
                 foreach (Control ctrl in FlowLayoutPanelServerClients.Controls)
                 {
-                    NF.ServerThread thread = (NF.ServerThread)ctrl.Tag;
+                    ServCli.ServerThread thread = (ServCli.ServerThread)ctrl.Tag;
                     if (thread == st)
                     {
                         ctrlLabel = ctrl;
@@ -1351,7 +1059,6 @@ namespace TCPStreamer
                     FlowLayoutPanelServerClients.Controls.Remove(ctrlLabel);
                 }
 
-                //ProgressBar
                 Control ctrlProgress = null;
                 foreach (Control ctrl in FlowLayoutPanelServerProgressBars.Controls)
                 {
@@ -1367,7 +1074,6 @@ namespace TCPStreamer
                     FlowLayoutPanelServerProgressBars.Controls.Remove(ctrlProgress);
                 }
 
-                //ListenButton
                 Control ctrlListen = null;
                 foreach (Control ctrl in FlowLayoutPanelServerListen.Controls)
                 {
@@ -1383,7 +1089,6 @@ namespace TCPStreamer
                     FlowLayoutPanelServerListen.Controls.Remove(ctrlListen);
                 }
 
-                //SpeakButton
                 Control ctrlSpeak = null;
                 foreach (Control ctrl in FlowLayoutPanelServerSpeak.Controls)
                 {
@@ -1401,11 +1106,7 @@ namespace TCPStreamer
 
             }));
         }
-        /// <summary>
-        /// RemoveServerClientToFlowLayoutPanel_ServerClient
-        /// </summary>
-        /// <param name="st"></param>
-        private void RemoveServerClientToFlowLayoutPanel_ServerClient(NF.ServerThread st)
+        private void RemoveServerClientToFlowLayoutPanel_ServerClient(ServCli.ServerThread st)
         {
             try
             {
@@ -1421,17 +1122,12 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// RemoveServerClientToFlowLayoutPanel_ButtonListen
-        /// </summary>
-        /// <param name="st"></param>
         private void RemoveServerClientToFlowLayoutPanel_ButtonListen(ServerThreadData data)
         {
             try
             {
                 FlowLayoutPanelServerListen.Invoke(new MethodInvoker(delegate ()
                 {
-                    //Button löschen
                     RemoveControlByTag(FlowLayoutPanelServerListen.Controls, data);
                 }));
             }
@@ -1440,17 +1136,13 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// RemoveServerClientToFlowLayoutPanel_ButtonSpeak
-        /// </summary>
-        /// <param name="data"></param>
+
         private void RemoveServerClientToFlowLayoutPanel_ButtonSpeak(ServerThreadData data)
         {
             try
             {
                 FlowLayoutPanelServerSpeak.Invoke(new MethodInvoker(delegate ()
                 {
-                    //Button löschen
                     RemoveControlByTag(FlowLayoutPanelServerSpeak.Controls, data);
                 }));
             }
@@ -1459,17 +1151,13 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// AddServerClientToFlowLayoutPanel_ServerClient
-        /// </summary>
-        /// <param name="st"></param>
-        private void AddServerClientToFlowLayoutPanel_ServerClient(NF.ServerThread st)
+
+        private void AddServerClientToFlowLayoutPanel_ServerClient(ServCli.ServerThread st)
         {
             try
             {
                 FlowLayoutPanelServerClients.Invoke(new MethodInvoker(delegate ()
                 {
-                    //Label erstellen
                     Label lab = new Label();
                     lab.AutoSize = false;
                     lab.BackColor = Color.DimGray;
@@ -1478,10 +1166,9 @@ namespace TCPStreamer
                     lab.Margin = new Padding(5, FlowLayoutPanelServerClients.Controls.Count > 0 ? 5 : 10, 0, 5);
                     lab.TextAlign = ContentAlignment.MiddleCenter;
                     lab.Width = FlowLayoutPanelServerClients.Width - 10;
-                    lab.Text = st.Client.Client.RemoteEndPoint.ToString();
+                    lab.Text = txtBoxUsuario.Text + " : " + txtBoxPortaCliente.Text;
                     lab.Tag = st;
 
-                    //Hinzufügen
                     FlowLayoutPanelServerClients.Controls.Add(lab);
                 }));
             }
@@ -1490,17 +1177,13 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// AddServerClientToFlowLayoutPanel_ServerProgressBars
-        /// </summary>
-        /// <param name="st"></param>
+
         private void AddServerClientToFlowLayoutPanel_ServerProgressBars(ServerThreadData stData)
         {
             try
             {
                 FlowLayoutPanelServerProgressBars.Invoke(new MethodInvoker(delegate ()
                 {
-                    //ProgressBar erstellen
                     ProgressBar prog = new ProgressBar();
                     prog.AutoSize = false;
                     prog.Margin = new Padding(5, FlowLayoutPanelServerProgressBars.Controls.Count > 0 ? 5 : 10, 0, 5);
@@ -1509,7 +1192,6 @@ namespace TCPStreamer
                     prog.Maximum = (int)stData.JitterBuffer.Maximum;
                     prog.Tag = stData;
 
-                    //Hinzufügen
                     FlowLayoutPanelServerProgressBars.Controls.Add(prog);
                 }));
             }
@@ -1518,29 +1200,24 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// AddServerClientToFlowLayoutPanel_ServerListenButtons
-        /// </summary>
-        /// <param name="stData"></param>
+
         private void AddServerClientToFlowLayoutPanel_ServerListenButtons(ServerThreadData stData)
         {
             try
             {
                 this.Invoke(new MethodInvoker(delegate ()
                 {
-                    //Button Listen erstellen
                     Button btnListen = new Button();
                     btnListen.Width = 26;
                     btnListen.Height = 27;
                     btnListen.Margin = new Padding(0, FlowLayoutPanelServerListen.Controls.Count > 0 ? 3 : 8, 0, 3);
                     btnListen.Tag = stData;
                     btnListen.BackColor = Color.LightGray;
-                    btnListen.ImageAlign = ContentAlignment.MiddleCenter;
-                    btnListen.Image = Properties.Resources.Listen_On_Small;
+                    btnListen.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Listen_On.png");
+                    btnListen.BackgroundImageLayout = ImageLayout.Zoom;
                     btnListen.Tag = stData;
                     btnListen.MouseClick += new MouseEventHandler(OnButtonServerThreadListenClick);
 
-                    //Hinzufügen
                     FlowLayoutPanelServerListen.Controls.Add(btnListen);
                 }));
             }
@@ -1549,17 +1226,13 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// AddServerClientToFlowLayoutPanel_ServerSpeakButtons
-        /// </summary>
-        /// <param name="stData"></param>
+
         private void AddServerClientToFlowLayoutPanel_ServerSpeakButtons(ServerThreadData stData)
         {
             try
             {
                 FlowLayoutPanelServerSpeak.Invoke(new MethodInvoker(delegate ()
                 {
-                    //Button Listen erstellen
                     Button btnSpeak = new Button();
                     btnSpeak.Width = 26;
                     btnSpeak.Height = 27;
@@ -1567,11 +1240,11 @@ namespace TCPStreamer
                     btnSpeak.Tag = stData;
                     btnSpeak.ImageAlign = ContentAlignment.MiddleCenter;
                     btnSpeak.BackColor = Color.LightGray;
-                    btnSpeak.Image = Properties.Resources.Speak_On_Small;
+                    btnSpeak.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Speak_On.png");
+                    btnSpeak.BackgroundImageLayout = ImageLayout.Zoom;
                     btnSpeak.Tag = stData;
                     btnSpeak.MouseClick += new MouseEventHandler(OnButtonServerThreadSpeakClick);
 
-                    //Hinzufügen
                     FlowLayoutPanelServerSpeak.Controls.Add(btnSpeak);
                 }));
             }
@@ -1580,11 +1253,6 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// OnButtonServerThreadListenClick
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void OnButtonServerThreadListenClick(Object sender, MouseEventArgs e)
         {
             try
@@ -1593,30 +1261,26 @@ namespace TCPStreamer
                 if (btn.Tag != null)
                 {
                     ServerThreadData data = (ServerThreadData)btn.Tag;
-                    //Mute toggeln
+
                     data.IsMute = !data.IsMute;
 
-                    //Anzeigen
                     if (data.IsMute)
                     {
-                        btn.Image = Properties.Resources.Listen_Off_Small;
+                        btn.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Listen_Off.png");
+                        btn.BackgroundImageLayout = ImageLayout.Zoom;
                     }
                     else
                     {
-                        btn.Image = Properties.Resources.Listen_On_Small;
+                        btn.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Listen_On.png");
+                        btn.BackgroundImageLayout = ImageLayout.Zoom;
                     }
                 }
             }
             catch (Exception ex)
             {
-                ShowError(LabelServer, ex.Message);
+                ShowError(lblLogServer, ex.Message);
             }
         }
-        /// <summary>
-        /// OnButtonServerThreadSpeakClick
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void OnButtonServerThreadSpeakClick(Object sender, MouseEventArgs e)
         {
             try
@@ -1625,36 +1289,33 @@ namespace TCPStreamer
                 if (btn.Tag != null)
                 {
                     ServerThreadData data = (ServerThreadData)btn.Tag;
-                    //Mute toggeln
+
                     data.ServerThread.IsMute = !data.ServerThread.IsMute;
 
-                    //Anzeigen
                     if (data.ServerThread.IsMute)
                     {
-                        btn.Image = Properties.Resources.Speak_Off_Small;
+                        btn.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Speak_Off.png");
+                        btn.BackgroundImageLayout = ImageLayout.Zoom;
                     }
                     else
                     {
-                        btn.Image = Properties.Resources.Speak_On_Small;
+                        btn.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Speak_On.png");
+                        btn.BackgroundImageLayout = ImageLayout.Zoom;
                     }
                 }
             }
             catch (Exception ex)
             {
-                ShowError(LabelServer, ex.Message);
+                ShowError(lblLogServer, ex.Message);
             }
         }
-        /// <summary>
-        /// RemoveServerClientToFlowLayoutPanel_ServerProgressBar
-        /// </summary>
-        /// <param name="st"></param>
+
         private void RemoveServerClientToFlowLayoutPanel_ServerProgressBar(ServerThreadData data)
         {
             try
             {
                 FlowLayoutPanelServerProgressBars.Invoke(new MethodInvoker(delegate ()
                 {
-                    //ProgressBar löschen
                     RemoveControlByTag(FlowLayoutPanelServerProgressBars.Controls, data);
                 }));
             }
@@ -1663,17 +1324,11 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// OnServerDataReceived
-        /// </summary>
-        /// <param name="st"></param>
-        /// <param name="data"></param>
-        private void OnServerDataReceived(NF.ServerThread st, Byte[] data)
+
+        private void OnServerDataReceived(ServCli.ServerThread st, Byte[] data)
         {
-            //Wenn vorhanden
             if (m_DictionaryServerDatas.ContainsKey(st))
             {
-                //Wenn Protocol
                 ServerThreadData stData = m_DictionaryServerDatas[st];
                 if (stData.Protocol != null)
                 {
@@ -1681,9 +1336,6 @@ namespace TCPStreamer
                 }
             }
         }
-        /// <summary>
-        /// DeleteAllServerThreadDatas
-        /// </summary>
         private void DeleteAllServerThreadDatas()
         {
             lock (LockerDictionary)
@@ -1702,24 +1354,18 @@ namespace TCPStreamer
                 }
             }
         }
-        /// <summary>
-        ///IsServerRunning 
-        /// </summary>
         private bool IsServerRunning
         {
             get
             {
                 if (m_Server != null)
                 {
-                    return m_Server.State == NF.TCPServer.ListenerState.Started;
+                    return m_Server.State == ServCli.TCPServidorVoz.ListenerState.Started;
                 }
                 return false;
             }
         }
-        /// <summary>
-        /// IsClientConnected
-        /// </summary>
-        private bool IsClientConnected
+          private bool IsClientConnected
         {
             get
             {
@@ -1730,19 +1376,17 @@ namespace TCPStreamer
                 return false;
             }
         }
-        /// <summary>
-        /// ShowClientConnected
-        /// </summary>
         private void ShowClientConnected()
         {
             try
             {
                 this.Invoke(new MethodInvoker(delegate ()
                 {
-                    ButtonClient.BackColor = Color.DarkGreen;
-                    ButtonClient.ForeColor = Color.White;
+                    btnConectarCliente.Text = "Desconectar";
+                    btnConectarCliente.BackColor = Color.Green;
+                    btnConectarCliente.ForeColor = Color.White;
                     TextBoxClientAddress.Enabled = false;
-                    TextBoxClientPort.Enabled = false;
+                    txtBoxPortaCliente.Enabled = false;
                     NumericUpDownJitterBufferClient.Enabled = false;
                     ComboboxOutputSoundDeviceNameClient.Enabled = false;
                     ComboboxInputSoundDeviceNameClient.Enabled = false;
@@ -1754,19 +1398,17 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// ShowClientDisconnected
-        /// </summary>
         private void ShowClientDisconnected()
         {
             try
             {
                 this.Invoke(new MethodInvoker(delegate ()
                 {
-                    ButtonClient.BackColor = Color.Gray;
-                    ButtonClient.ForeColor = Color.Black;
+                    btnConectarCliente.Text = "Conectar";
+                    btnConectarCliente.BackColor = Color.Gray;
+                    btnConectarCliente.ForeColor = Color.Black;
                     TextBoxClientAddress.Enabled = true;
-                    TextBoxClientPort.Enabled = true;
+                    txtBoxPortaCliente.Enabled = true;
                     NumericUpDownJitterBufferClient.Enabled = true;
                     ComboboxOutputSoundDeviceNameClient.Enabled = true;
                     ComboboxInputSoundDeviceNameClient.Enabled = true;
@@ -1778,21 +1420,18 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// ShowServerStarted 
-        /// </summary>
         private void ShowServerStarted()
         {
             try
             {
                 this.Invoke(new MethodInvoker(delegate ()
                 {
-                    ButtonServer.BackColor = Color.DarkGreen;
-                    ButtonServer.ForeColor = Color.White;
+                    btnAbrirConexao.BackColor = Color.Green;
+                    btnAbrirConexao.ForeColor = Color.White;
                     NumericUpDownJitterBufferServer.Enabled = false;
                     ComboboxOutputSoundDeviceNameServer.Enabled = false;
                     ComboboxInputSoundDeviceNameServer.Enabled = false;
-                    TextBoxServerAddress.Enabled = false;
+                    txtIpAdress.Enabled = false;
                     TextBoxServerPort.Enabled = false;
                     ComboboxSamplesPerSecondServer.Enabled = false;
                     StartTimerDrawProgressBar();
@@ -1803,17 +1442,14 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// ShowServerStopped
-        /// </summary>
         private void ShowServerStopped()
         {
             try
             {
                 this.Invoke(new MethodInvoker(delegate ()
                 {
-                    ButtonServer.BackColor = Color.Gray;
-                    ButtonServer.ForeColor = Color.Black;
+                    btnAbrirConexao.BackColor = Color.Green;
+                    btnAbrirConexao.ForeColor = Color.Black;
                     StopTimerDrawProgressBar();
                     FlowLayoutPanelServerClients.Controls.Clear();
                     FlowLayoutPanelServerProgressBars.Controls.Clear();
@@ -1822,7 +1458,7 @@ namespace TCPStreamer
                     NumericUpDownJitterBufferServer.Enabled = true;
                     ComboboxOutputSoundDeviceNameServer.Enabled = true;
                     ComboboxInputSoundDeviceNameServer.Enabled = true;
-                    TextBoxServerAddress.Enabled = true;
+                    txtIpAdress.Enabled = true;
                     TextBoxServerPort.Enabled = true;
                     ComboboxSamplesPerSecondServer.Enabled = true;
                 }));
@@ -1832,9 +1468,6 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// ShowStreamingFromSounddeviceStarted 
-        /// </summary>
         private void ShowStreamingFromSounddeviceStarted_Client()
         {
             try
@@ -1856,9 +1489,6 @@ namespace TCPStreamer
                 ShowError(LabelClient, ex.Message);
             }
         }
-        /// <summary>
-        /// ShowStreamingFromSounddeviceStopped_Client 
-        /// </summary>
         private void ShowStreamingFromSounddeviceStopped_Client()
         {
             try
@@ -1880,9 +1510,6 @@ namespace TCPStreamer
                 ShowError(LabelClient, ex.Message);
             }
         }
-        /// <summary>
-        /// ShowStreamingFromSounddeviceStarted_Server
-        /// </summary>
         private void ShowStreamingFromSounddeviceStarted_Server()
         {
             try
@@ -1904,9 +1531,6 @@ namespace TCPStreamer
                 ShowError(LabelClient, ex.Message);
             }
         }
-        /// <summary>
-        /// ShowStreamingFromSounddeviceStopped_Server
-        /// </summary>
         private void ShowStreamingFromSounddeviceStopped_Server()
         {
             try
@@ -1928,9 +1552,6 @@ namespace TCPStreamer
                 ShowError(LabelClient, ex.Message);
             }
         }
-        /// <summary>
-        /// ShowStreamingFromFileStarted 
-        /// </summary>
         private void ShowStreamingFromFileStarted()
         {
             try
@@ -1953,9 +1574,6 @@ namespace TCPStreamer
                 ShowError(LabelClient, ex.Message);
             }
         }
-        /// <summary>
-        /// ShowStreamingFromFileStopped 
-        /// </summary>
         private void ShowStreamingFromFileStopped()
         {
             try
@@ -1978,11 +1596,6 @@ namespace TCPStreamer
                 ShowError(LabelClient, ex.Message);
             }
         }
-        /// <summary>
-        /// ShowError
-        /// </summary>
-        /// <param name="lb"></param>
-        /// <param name="text"></param>
         private void ShowError(Label lb, string text)
         {
             try
@@ -1992,14 +1605,13 @@ namespace TCPStreamer
                     lb.Text = text;
                     lb.ForeColor = Color.Red;
 
-                    //Je nach Quelle
                     if (lb == LabelClient)
                     {
-                        ButtonClient.BackColor = Color.Red;
+                        btnConectarCliente.BackColor = Color.Gray;
                     }
-                    else if (lb == LabelServer)
+                    else if (lb == lblLogServer)
                     {
-                        ButtonServer.BackColor = Color.Red;
+                        btnAbrirConexao.BackColor = Color.Gray;
                     }
                 }));
             }
@@ -2008,11 +1620,6 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// ShowInfo
-        /// </summary>
-        /// <param name="lb"></param>
-        /// <param name="text"></param>
         private void ShowMessage(Label lb, string text)
         {
             try
@@ -2028,17 +1635,13 @@ namespace TCPStreamer
                 Console.WriteLine(ex.Message);
             }
         }
-        /// <summary>
-        /// FormToConfig
-        /// </summary>
-        /// <returns></returns>
         private bool FormToConfig()
         {
             try
             {
                 m_Config.IpAddressClient = TextBoxClientAddress.Text;
-                m_Config.IPAddressServer = TextBoxServerAddress.Text;
-                m_Config.PortClient = Convert.ToInt32(TextBoxClientPort.Text);
+                m_Config.IPAddressServer = txtIpAdress.Text;
+                m_Config.PortClient = Convert.ToInt32(txtBoxPortaCliente.Text);
                 m_Config.PortServer = Convert.ToInt32(TextBoxServerPort.Text);
                 m_Config.SoundInputDeviceNameClient = ComboboxInputSoundDeviceNameClient.SelectedIndex >= 0 ? ComboboxInputSoundDeviceNameClient.SelectedItem.ToString() : "";
                 m_Config.SoundOutputDeviceNameClient = ComboboxOutputSoundDeviceNameClient.SelectedIndex >= 0 ? ComboboxOutputSoundDeviceNameClient.SelectedItem.ToString() : "";
@@ -2061,17 +1664,13 @@ namespace TCPStreamer
                 return false;
             }
         }
-        /// <summary>
-        /// ConfigToForm
-        /// </summary>
-        /// <returns></returns>
         private bool ConfigToForm()
         {
             try
             {
                 TextBoxClientAddress.Text = m_Config.IpAddressClient.ToString();
-                TextBoxServerAddress.Text = m_Config.IPAddressServer.ToString();
-                TextBoxClientPort.Text = m_Config.PortClient.ToString();
+                txtIpAdress.Text = m_Config.IPAddressServer.ToString();
+                txtBoxPortaCliente.Text = m_Config.PortClient.ToString();
                 TextBoxServerPort.Text = m_Config.PortServer.ToString();
                 ComboboxInputSoundDeviceNameClient.SelectedIndex = ComboboxInputSoundDeviceNameClient.FindString(m_Config.SoundInputDeviceNameClient);
                 ComboboxOutputSoundDeviceNameClient.SelectedIndex = ComboboxOutputSoundDeviceNameClient.FindString(m_Config.SoundOutputDeviceNameClient);
@@ -2081,7 +1680,6 @@ namespace TCPStreamer
                 NumericUpDownJitterBufferClient.Value = m_Config.JitterBufferCountClient;
                 ComboboxSamplesPerSecondServer.SelectedIndex = ComboboxSamplesPerSecondServer.FindString(m_Config.SamplesPerSecondServer.ToString());
 
-                //Sonstiges
                 ShowButtonServerSpeak();
                 ShowButtonClientListen();
                 ShowButtonServerListen();
@@ -2095,9 +1693,7 @@ namespace TCPStreamer
                 return false;
             }
         }
-        //----------------------------------------------------------------
-        //Daten schreiben
-        //----------------------------------------------------------------
+
         private void SaveConfig()
         {
             try
@@ -2113,14 +1709,11 @@ namespace TCPStreamer
                 MessageBox.Show(ex.Message);
             }
         }
-        //----------------------------------------------------------------
-        //Daten lesen
-        //---------------------------------------------------------------- 
+
         private void LoadConfig()
         {
             try
             {
-                //Wenn die Datei existiert
                 if (File.Exists(m_ConfigFileName))
                 {
                     XmlSerializer ser = new XmlSerializer(typeof(Configuration));
@@ -2129,7 +1722,6 @@ namespace TCPStreamer
                     sr.Close();
                 }
 
-                //Daten anzeigen
                 ConfigToForm();
             }
             catch (Exception ex)
@@ -2137,28 +1729,20 @@ namespace TCPStreamer
                 MessageBox.Show(ex.Message);
             }
         }
-        /// <summary>
-        /// FormMain_FormClosing
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             try
             {
-                //Form ist geschlossen
                 m_IsFormMain = false;
 
-                //Aufnahme beenden
                 StopRecordingFromSounddevice_Server();
-                //Streamen von Sounddevice beenden
+
                 StopRecordingFromSounddevice_Client();
-                //Client beenden
+
                 DisconnectClient();
-                //Server beenden
+
                 StopServer();
 
-                //Speichern
                 SaveConfig();
             }
             catch (Exception ex)
@@ -2170,9 +1754,8 @@ namespace TCPStreamer
         {
             try
             {
-                //Daten holen
                 FormToConfig();
-
+                TrataComportamentoDesignCliente();
                 if (IsClientConnected)
                 {
                     DisconnectClient();
@@ -2184,7 +1767,6 @@ namespace TCPStreamer
                     AbrirConexaoParaTexto();
                 }
 
-                //Kurz warten
                 System.Threading.Thread.Sleep(100);
             }
             catch (Exception ex)
@@ -2192,30 +1774,44 @@ namespace TCPStreamer
                 ShowError(LabelClient, ex.Message);
             }
         }
-        /// <summary>
-        /// ButtonServer_Click
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+
+        private void TrataComportamentoDesignCliente()
+        {
+            if (!IsClientConnected)
+            {
+                btnConectarCliente.Text = "Conectar";
+                btnConectarCliente.ForeColor = Color.Black;
+                btnConectarCliente.BackColor = Color.Green;
+            }
+            else
+            {
+                btnConectarCliente.Text = "Desconectar";
+                btnConectarCliente.ForeColor = Color.White;
+                btnConectarCliente.BackColor = Color.Green;
+
+            }
+        }
+
         private void ButtonServer_Click(object sender, EventArgs e)
         {
             try
             {
-                //Daten holen
                 FormToConfig();
+                TrataComportamentoDesign();
 
                 if (IsServerRunning)
                 {
                     StopServer();
                     StopRecordingFromSounddevice_Server();
                     StopTimerMixed();
+                    lblLogServer.Text = "Conexão Fechada...\r\n";
                 }
                 else
                 {
                     StartServer();
+                    AbreConexaoChatTexto();
 
-                    //Wenn aktiv
-                    if (m_Config.ServerNoSpeakAll == false)
+                    if (!m_Config.ServerNoSpeakAll)
                     {
                         StartRecordingFromSounddevice_Server();
                     }
@@ -2225,37 +1821,66 @@ namespace TCPStreamer
             }
             catch (Exception ex)
             {
-                ShowError(LabelServer, ex.Message);
+                ShowError(lblLogServer, ex.Message);
             }
         }
-        /// <summary>
-        /// NumericUpDownJitterBufferServer_ValueChanged
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+
+        private void TrataComportamentoDesign()
+        {
+            if (!IsServerRunning)
+            {
+                btnAbrirConexao.Text = "Fechar";
+                btnAbrirConexao.ForeColor = Color.Black;
+                btnAbrirConexao.BackColor = Color.Green;
+            }
+            else
+            {
+                btnAbrirConexao.Text = "Abrir";
+                btnAbrirConexao.ForeColor = Color.White;
+                btnAbrirConexao.BackColor = Color.Green;
+
+            }
+
+        }
+
         private void NumericUpDownJitterBufferServer_ValueChanged(object sender, EventArgs e)
         {
             m_Config.JitterBufferCountServer = (uint)NumericUpDownJitterBufferServer.Value;
         }
-        /// <summary>
-        /// NumericUpDownJitterBufferClient_ValueChanged
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void NumericUpDownJitterBufferClient_ValueChanged(object sender, EventArgs e)
         {
             m_Config.JitterBufferCountClient = (uint)NumericUpDownJitterBufferClient.Value;
         }
-        /// <summary>
-        /// StopStreamSounddevice_Client
-        /// </summary>
-        private void StopStreamSounddevice_Client()
+
+        private void AbreConexaoChatTexto()
         {
-            StopRecordingFromSounddevice_Client();
+            // Analisa o endereço IP do servidor informado no textbox
+            IPAddress enderecoIP = IPAddress.Parse(txtIpAdress.Text);
+
+            // Cria uma nova instância do objeto ChatServidor
+            TcpServidorChat mainServidor = new TcpServidorChat(enderecoIP);
+
+
+            // Inicia o atendimento das conexões
+            mainServidor.IniciaAtendimento();
+
+            // Mostra que nos iniciamos o atendimento para conexões
+            lblLogServer.Text = "Monitorando as conexões de Texto...\r\n";
+
         }
-        /// <summary>
-        /// IsPlayingToSoundDeviceWanted
-        /// </summary>
+
+        public void mainServidor_StatusChanged(object sender, StatusChangedEventArgs e)
+        {
+            // Chama o método que atualiza o formulário
+            this.Invoke(new AtualizaStatusCallback(this.AtualizaStatus), new object[] { e.EventMessage });
+        }
+
+        private void AtualizaStatus(string strMensagem)
+        {
+            // Atualiza o logo com mensagens
+            lblLogServer.Text = strMensagem + "\r\n";
+        }
+
         private bool IsPlayingToSoundDeviceWanted
         {
             get
@@ -2267,15 +1892,10 @@ namespace TCPStreamer
                 return false;
             }
         }
-        /// <summary>
-        /// StartPlayingToSounddevice_Client
-        /// </summary>
         private void StartPlayingToSounddevice_Client()
         {
-            //Wenn gewünscht
             if (IsPlayingToSoundDeviceWanted)
             {
-                //JitterBuffer starten
                 if (m_JitterBufferClientPlaying != null)
                 {
                     InitJitterBufferClientPlaying();
@@ -2288,12 +1908,10 @@ namespace TCPStreamer
                     m_PlayerClient.Open(m_Config.SoundOutputDeviceNameClient, m_Config.SamplesPerSecondClient, m_Config.BitsPerSampleClient, m_Config.ChannelsClient, (int)m_Config.JitterBufferCountClient);
                 }
 
-                //Timer starten
                 m_TimerProgressBarPlayingClient.Start();
 
             }
 
-            //Anzeigen
             ComboboxOutputSoundDeviceNameClient.Invoke(new MethodInvoker(delegate ()
             {
                 ComboboxOutputSoundDeviceNameClient.Enabled = false;
@@ -2302,9 +1920,6 @@ namespace TCPStreamer
             }));
 
         }
-        /// <summary>
-        /// StopPlayingToSounddevice_Client
-        /// </summary>
         private void StopPlayingToSounddevice_Client()
         {
             if (m_PlayerClient != null)
@@ -2313,16 +1928,13 @@ namespace TCPStreamer
                 m_PlayerClient = null;
             }
 
-            //JitterBuffer beenden
             if (m_JitterBufferClientPlaying != null)
             {
                 m_JitterBufferClientPlaying.Stop();
             }
 
-            //Timer beenden
             m_TimerProgressBarPlayingClient.Stop();
 
-            //Anzeigen
             this.Invoke(new MethodInvoker(delegate ()
             {
                 ComboboxOutputSoundDeviceNameClient.Enabled = true;
@@ -2330,17 +1942,10 @@ namespace TCPStreamer
                 ProgressBarPlayingClient.Value = 0;
             }));
         }
-        /// <summary>
-        /// ButtonServerSpeak_Click
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void ButtonServerSpeak_Click(object sender, EventArgs e)
         {
-            //Toggeln
             m_Config.ServerNoSpeakAll = !m_Config.ServerNoSpeakAll;
 
-            //Je nach Zustand
             if (m_Config.ServerNoSpeakAll)
             {
                 StopRecordingFromSounddevice_Server();
@@ -2350,105 +1955,82 @@ namespace TCPStreamer
                 StartRecordingFromSounddevice_Server();
             }
 
-            //Anzeigen
             ShowButtonServerSpeak();
         }
-        /// <summary>
-        /// ShowButtonServerSpeak
-        /// </summary>
         private void ShowButtonServerSpeak()
         {
             if (m_Config.ServerNoSpeakAll)
             {
-                ButtonServerSpeak.Image = Properties.Resources.Speak_Off;
+                btnServidorMic.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Speak_Off.png");
+                btnServidorMic.BackgroundImageLayout = ImageLayout.Zoom;
             }
             else
             {
-                ButtonServerSpeak.Image = Properties.Resources.Speak_On;
+                btnServidorMic.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Speak_On.png");
+                btnServidorMic.BackgroundImageLayout = ImageLayout.Zoom;
             }
         }
-        /// <summary>
-        /// ShowButtonClientSpeak
-        /// </summary>
         private void ShowButtonClientSpeak()
         {
             if (m_Config.ClientNoSpeakAll)
             {
-                ButtonClientSpeak.Image = Properties.Resources.Speak_Off;
+                btnClienteMic.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Speak_Off.png");
+                btnClienteMic.BackgroundImageLayout = ImageLayout.Zoom;
             }
             else
             {
-                ButtonClientSpeak.Image = Properties.Resources.Speak_On;
+                btnClienteMic.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Speak_On.png");
+                btnClienteMic.BackgroundImageLayout = ImageLayout.Zoom;
             }
         }
-        /// <summary>
-        /// ButtonClientListen_Click
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void ButtonClientListen_Click(object sender, EventArgs e)
         {
-            //Toggeln
             m_Config.MuteClientPlaying = !m_Config.MuteClientPlaying;
-            //Anzeigen
             ShowButtonClientListen();
         }
-        /// <summary>
-        /// ShowButtonServerSpeak
-        /// </summary>
+
         private void ShowButtonClientListen()
         {
             if (m_Config.MuteClientPlaying)
             {
-                ButtonClientListen.Image = Properties.Resources.Listen_Off;
+                btncClienteAudio.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Listen_Off.png");
+                btncClienteAudio.BackgroundImageLayout = ImageLayout.Zoom;
             }
             else
             {
-                ButtonClientListen.Image = Properties.Resources.Listen_On;
+                btncClienteAudio.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Listen_On.png");
+                btncClienteAudio.BackgroundImageLayout = ImageLayout.Zoom;
             }
         }
-        /// <summary>
-        /// ButtonServerListen_Click
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void ButtonServerListen_Click(object sender, EventArgs e)
         {
-            //Toggeln
+
             m_Config.MuteServerListen = !m_Config.MuteServerListen;
 
-            //Anzeigen
+
             ShowButtonServerListen();
         }
-        /// <summary>
-        /// ShowButtonServerListen
-        /// </summary>
         private void ShowButtonServerListen()
         {
             if (m_Config.MuteServerListen)
             {
-                ButtonServerListen.Image = Properties.Resources.Listen_Off;
+                btnServidorAudio.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Listen_Off.png");
+                btnServidorAudio.BackgroundImageLayout = ImageLayout.Zoom;
             }
             else
             {
-                ButtonServerListen.Image = Properties.Resources.Listen_On;
+                btnServidorAudio.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Listen_On.png");
+                btnServidorAudio.BackgroundImageLayout = ImageLayout.Zoom;
             }
 
-            //Speichern
             ServerThreadData.IsMuteAll = m_Config.MuteServerListen;
         }
-        /// <summary>
-        /// ButtonClientSpeak_Click
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void ButtonClientSpeak_Click(object sender, EventArgs e)
         {
             try
             {
-                //Toggeln
                 m_Config.ClientNoSpeakAll = !m_Config.ClientNoSpeakAll;
-                //Anzeigen
+
                 ShowButtonClientSpeak();
             }
             catch (Exception ex)
@@ -2460,6 +2042,7 @@ namespace TCPStreamer
         private void btnEnviarMsg_Click(object sender, EventArgs e)
         {
             EnviaMensagem();
+
         }
 
         private void EnviaMensagem()
@@ -2475,7 +2058,6 @@ namespace TCPStreamer
 
         private void AtualizaMensagens(string strMensagem)
         {
-            // Anexa texto ao final de cada linha
             txtboxMensagens.AppendText(strMensagem + "\r\n");
         }
 
@@ -2484,13 +2066,13 @@ namespace TCPStreamer
 
             strReceptor = new StreamReader(tcpServidor.GetStream());
             string ConResposta = strReceptor.ReadLine();
-            // Se o primeiro caracater da resposta é 1 a conexão foi feita com sucesso
+
             if (IsClientConnected)
             {
                 // Atualiza o formulário para informar que esta conectado
                 this.Invoke(new AtualizaLogCallBack(this.AtualizaMensagens), new object[] { "Conectado com sucesso!" });
             }
-            else // Se o primeiro caractere não for 1 a conexão falhou
+            else 
             {
                 string Motivo = "Não Conectado: ";
                 // Extrai o motivo da mensagem resposta. O motivo começa no 3o caractere
@@ -2526,8 +2108,7 @@ namespace TCPStreamer
         {
 
             tcpServidor = new System.Net.Sockets.TcpClient();
-            int porta = int.Parse(TextBoxClientPort.Text);
-            tcpServidor.Connect(TextBoxClientAddress.Text, porta);
+            tcpServidor.Connect(TextBoxClientAddress.Text, 2502);
 
             stwEnviador = new StreamWriter(tcpServidor.GetStream());
             stwEnviador.WriteLine(txtBoxUsuario.Text);
@@ -2553,227 +2134,184 @@ namespace TCPStreamer
             webCamPainel.Visible = false;
 
         }
-    }
-    /// <summary>
-    /// Config
-    /// </summary>
-    public class Configuration
-    {
-        /// <summary>
-        /// Config
-        /// </summary>
-        public Configuration()
-        {
 
+
+        private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == 13)
+            {
+                btnEnviarMsg.PerformClick();
+            }
         }
 
-        //Attribute
-        public String IpAddressClient = "";
-        public String IPAddressServer = "";
-        public int PortClient = 0;
-        public int PortServer = 0;
-        public String SoundInputDeviceNameClient = "";
-        public String SoundOutputDeviceNameClient = "";
-        public String SoundInputDeviceNameServer = "";
-        public String SoundOutputDeviceNameServer = "";
-        public int SamplesPerSecondClient = 8000;
-        public int BitsPerSampleClient = 16;
-        public int ChannelsClient = 1;
-        public int SamplesPerSecondServer = 8000;
-        public int BitsPerSampleServer = 16;
-        public int ChannelsServer = 1;
-        public bool UseJitterBufferClientRecording = true;
-        public bool UseJitterBufferServerRecording = true;
-        public uint JitterBufferCountServer = 20;
-        public uint JitterBufferCountClient = 20;
-        public string FileName = "";
-        public bool LoopFile = false;
-        public bool MuteClientPlaying = false;
-        public bool ServerNoSpeakAll = false;
-        public bool ClientNoSpeakAll = false;
-        public bool MuteServerListen = false;
-    }
-    /// <summary>
-    /// ServerThreadData
-    /// </summary>
-    public class ServerThreadData
-    {
-        /// <summary>
-        /// Konstruktor
-        /// </summary>
-        public ServerThreadData()
+        public class Configuration
         {
+            public Configuration()
+            {
 
+            }
+
+            public String IpAddressClient = "";
+            public String IPAddressServer = "";
+            public int PortClient = 0;
+            public int PortServer = 0;
+            public String SoundInputDeviceNameClient = "";
+            public String SoundOutputDeviceNameClient = "";
+            public String SoundInputDeviceNameServer = "";
+            public String SoundOutputDeviceNameServer = "";
+            public int SamplesPerSecondClient = 8000;
+            public int BitsPerSampleClient = 16;
+            public int ChannelsClient = 1;
+            public int SamplesPerSecondServer = 8000;
+            public int BitsPerSampleServer = 16;
+            public int ChannelsServer = 1;
+            public bool UseJitterBufferClientRecording = true;
+            public bool UseJitterBufferServerRecording = true;
+            public uint JitterBufferCountServer = 20;
+            public uint JitterBufferCountClient = 20;
+            public string FileName = "";
+            public bool LoopFile = false;
+            public bool MuteClientPlaying = false;
+            public bool ServerNoSpeakAll = false;
+            public bool ClientNoSpeakAll = false;
+            public bool MuteServerListen = false;
         }
 
-        //Attribute
-        public NF.ServerThread ServerThread;
-        public WinSound.Player Player;
-        public WinSound.JitterBuffer JitterBuffer;
-        public WinSound.Protocol Protocol;
-        public int SamplesPerSecond = 8000;
-        public int BitsPerSample = 16;
-        public int SoundBufferCount = 8;
-        public uint JitterBufferCount = 20;
-        public uint JitterBufferMilliseconds = 20;
-        public int Channels = 1;
-        private bool IsInitialized = false;
-        public bool IsMute = false;
-        public static bool IsMuteAll = false;
-
-        /// <summary>
-        /// Init
-        /// </summary>
-        /// <param name="bitsPerSample"></param>
-        /// <param name="channels"></param>
-        public void Init(NF.ServerThread st, string soundDeviceName, int samplesPerSecond, int bitsPerSample, int channels, int soundBufferCount, uint jitterBufferCount, uint jitterBufferMilliseconds)
+        public class ServerThreadData
         {
-            //Werte übernehmen
-            this.ServerThread = st;
-            this.SamplesPerSecond = samplesPerSecond;
-            this.BitsPerSample = bitsPerSample;
-            this.Channels = channels;
-            this.SoundBufferCount = soundBufferCount;
-            this.JitterBufferCount = jitterBufferCount;
-            this.JitterBufferMilliseconds = jitterBufferMilliseconds;
-
-            //Player
-            this.Player = new WinSound.Player();
-            this.Player.Open(soundDeviceName, samplesPerSecond, bitsPerSample, channels, soundBufferCount);
-
-            //Wenn ein JitterBuffer verwendet werden soll
-            if (jitterBufferCount >= 2)
+            public ServerThreadData()
             {
-                //Neuen JitterBuffer erstellen
-                this.JitterBuffer = new WinSound.JitterBuffer(st, jitterBufferCount, jitterBufferMilliseconds);
-                this.JitterBuffer.DataAvailable += new WinSound.JitterBuffer.DelegateDataAvailable(OnJitterBufferDataAvailable);
-                this.JitterBuffer.Start();
+
             }
 
-            //Protocol
-            this.Protocol = new WinSound.Protocol(WinSound.ProtocolTypes.LH, Encoding.Default);
-            this.Protocol.DataComplete += new WinSound.Protocol.DelegateDataComplete(OnProtocolDataComplete);
+            public ServCli.ServerThread ServerThread;
+            public WinSound.Player Player;
+            public WinSound.JitterBuffer JitterBuffer;
+            public WinSound.Protocol Protocol;
+            public int SamplesPerSecond = 8000;
+            public int BitsPerSample = 16;
+            public int SoundBufferCount = 8;
+            public uint JitterBufferCount = 20;
+            public uint JitterBufferMilliseconds = 20;
+            public int Channels = 1;
+            private bool IsInitialized = false;
+            public bool IsMute = false;
+            public static bool IsMuteAll = false;
 
-            //Zu Mixer hinzufügen
-            FormMain.DictionaryMixed[st] = new Queue<List<byte>>();
-
-            //Initialisiert
-            IsInitialized = true;
-        }
-        /// <summary>
-        /// Dispose
-        /// </summary>
-        public void Dispose()
-        {
-            //Protocol
-            if (Protocol != null)
+               public void Init(ServCli.ServerThread st, string soundDeviceName, int samplesPerSecond, int bitsPerSample, int channels, int soundBufferCount, uint jitterBufferCount, uint jitterBufferMilliseconds)
             {
-                this.Protocol.DataComplete -= new WinSound.Protocol.DelegateDataComplete(OnProtocolDataComplete);
-                this.Protocol = null;
-            }
+                this.ServerThread = st;
+                this.SamplesPerSecond = samplesPerSecond;
+                this.BitsPerSample = bitsPerSample;
+                this.Channels = channels;
+                this.SoundBufferCount = soundBufferCount;
+                this.JitterBufferCount = jitterBufferCount;
+                this.JitterBufferMilliseconds = jitterBufferMilliseconds;
 
-            //JitterBuffer
-            if (JitterBuffer != null)
-            {
-                JitterBuffer.Stop();
-                JitterBuffer.DataAvailable -= new WinSound.JitterBuffer.DelegateDataAvailable(OnJitterBufferDataAvailable);
-                this.JitterBuffer = null;
-            }
+                this.Player = new WinSound.Player();
+                this.Player.Open(soundDeviceName, samplesPerSecond, bitsPerSample, channels, soundBufferCount);
 
-            //Player
-            if (Player != null)
-            {
-                Player.Close();
-                this.Player = null;
-            }
-
-            //Nicht initialisiert
-            IsInitialized = false;
-        }
-        /// <summary>
-        /// OnProtocolDataComplete
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="data"></param>
-        private void OnProtocolDataComplete(Object sender, Byte[] bytes)
-        {
-            //Wenn initialisiert
-            if (IsInitialized)
-            {
-                if (ServerThread != null && Player != null)
+                if (jitterBufferCount >= 2)
                 {
-                    try
-                    {
-                        //Wenn der Player gestartet wurde
-                        if (Player.Opened)
-                        {
-
-                            //RTP Header auslesen
-                            WinSound.RTPPacket rtp = new WinSound.RTPPacket(bytes);
-
-                            //Wenn Header korrekt
-                            if (rtp.Data != null)
-                            {
-                                //Wenn JitterBuffer verwendet werden soll
-                                if (JitterBuffer != null && JitterBuffer.Maximum >= 2)
-                                {
-                                    JitterBuffer.AddData(rtp);
-                                }
-                                else
-                                {
-                                    //Wenn kein Mute
-                                    if (IsMuteAll == false && IsMute == false)
-                                    {
-                                        //Nach Linear umwandeln
-                                        Byte[] linearBytes = WinSound.Utils.MuLawToLinear(rtp.Data, this.BitsPerSample, this.Channels);
-                                        //Abspielen
-                                        Player.PlayData(linearBytes, false);
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                        IsInitialized = false;
-                    }
+                    this.JitterBuffer = new WinSound.JitterBuffer(st, jitterBufferCount, jitterBufferMilliseconds);
+                    this.JitterBuffer.DataAvailable += new WinSound.JitterBuffer.DelegateDataAvailable(OnJitterBufferDataAvailable);
+                    this.JitterBuffer.Start();
                 }
+
+                this.Protocol = new WinSound.Protocol(WinSound.ProtocolTypes.LH, Encoding.Default);
+                this.Protocol.DataComplete += new WinSound.Protocol.DelegateDataComplete(OnProtocolDataComplete);
+
+                FormMain.DictionaryMixed[st] = new Queue<List<byte>>();
+
+                IsInitialized = true;
             }
-        }
-        /// <summary>
-        /// OnJitterBufferDataAvailable
-        /// </summary>
-        /// <param name="packet"></param>
-        private void OnJitterBufferDataAvailable(Object sender, WinSound.RTPPacket rtp)
-        {
-            try
+            public void Dispose()
             {
+                if (Protocol != null)
+                {
+                    this.Protocol.DataComplete -= new WinSound.Protocol.DelegateDataComplete(OnProtocolDataComplete);
+                    this.Protocol = null;
+                }
+
+                if (JitterBuffer != null)
+                {
+                    JitterBuffer.Stop();
+                    JitterBuffer.DataAvailable -= new WinSound.JitterBuffer.DelegateDataAvailable(OnJitterBufferDataAvailable);
+                    this.JitterBuffer = null;
+                }
+
                 if (Player != null)
                 {
-                    //Nach Linear umwandeln
-                    Byte[] linearBytes = WinSound.Utils.MuLawToLinear(rtp.Data, BitsPerSample, Channels);
+                    Player.Close();
+                    this.Player = null;
+                }
 
-                    //Wenn kein Mute
-                    if (IsMuteAll == false && IsMute == false)
+                IsInitialized = false;
+            }
+            private void OnProtocolDataComplete(Object sender, Byte[] bytes)
+            {
+                if (IsInitialized)
+                {
+                    if (ServerThread != null && Player != null)
                     {
-                        //Abspielen
-                        Player.PlayData(linearBytes, false);
-                    }
+                        try
+                        {
+                            if (Player.Opened)
+                            {
 
-                    //Wenn Buffer nicht zu gross
-                    Queue<List<Byte>> q = FormMain.DictionaryMixed[sender];
-                    if (q.Count < 10)
-                    {
-                        //Daten Zu Mixer hinzufügen
-                        FormMain.DictionaryMixed[sender].Enqueue(new List<Byte>(linearBytes));
+                                WinSound.RTPPacket rtp = new WinSound.RTPPacket(bytes);
+
+                                if (rtp.Data != null)
+                                {
+                                    if (JitterBuffer != null && JitterBuffer.Maximum >= 2)
+                                    {
+                                        JitterBuffer.AddData(rtp);
+                                    }
+                                    else
+                                    {
+                                        if (IsMuteAll == false && IsMute == false)
+                                        {
+                                            Byte[] linearBytes = WinSound.Utils.MuLawToLinear(rtp.Data, this.BitsPerSample, this.Channels);
+
+                                            Player.PlayData(linearBytes, false);
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            IsInitialized = false;
+                        }
                     }
                 }
             }
-            catch (Exception ex)
+            private void OnJitterBufferDataAvailable(Object sender, WinSound.RTPPacket rtp)
             {
-                Console.WriteLine(String.Format("FormMain.cs | OnJitterBufferDataAvailable() | {0}", ex.Message));
+                try
+                {
+                    if (Player != null)
+                    {
+                        Byte[] linearBytes = WinSound.Utils.MuLawToLinear(rtp.Data, BitsPerSample, Channels);
+
+                        if (IsMuteAll == false && IsMute == false)
+                        {
+                            Player.PlayData(linearBytes, false);
+                        }
+
+                        Queue<List<Byte>> q = FormMain.DictionaryMixed[sender];
+                        if (q.Count < 10)
+                        {
+                            FormMain.DictionaryMixed[sender].Enqueue(new List<Byte>(linearBytes));
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(String.Format("FormMain.cs | OnJitterBufferDataAvailable() | {0}", ex.Message));
+                }
             }
         }
     }

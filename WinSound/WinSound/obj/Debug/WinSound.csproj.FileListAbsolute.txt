@@ -4,3 +4,9 @@ D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TEste\Chat de voz\WinSound\WinSound\
 D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TEste\Chat de voz\WinSound\WinSound\obj\Debug\WinSound.csproj.CoreCompileInputs.cache
 D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TEste\Chat de voz\WinSound\WinSound\obj\Debug\WinSound.dll
 D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TEste\Chat de voz\WinSound\WinSound\obj\Debug\WinSound.pdb
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\WinSound\WinSound\bin\Debug\WinSound.dll
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\WinSound\WinSound\bin\Debug\WinSound.pdb
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\WinSound\WinSound\obj\Debug\WinSound.csproj.CoreCompileInputs.cache
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\WinSound\WinSound\obj\Debug\WinSound.dll
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\WinSound\WinSound\obj\Debug\WinSound.pdb
+D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\WinSound\WinSound\obj\Debug\WinSound.csproj.AssemblyReference.cache

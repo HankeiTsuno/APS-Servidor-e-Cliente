@@ -31,21 +31,21 @@ namespace TCPStreamer
         {
             this.picWebCam = new System.Windows.Forms.PictureBox();
             this.btnFoto = new System.Windows.Forms.Button();
-            this.lblPastaDestino = new System.Windows.Forms.Label();
+            this.lblPasta = new System.Windows.Forms.Label();
             this.btnProcurarPasta = new System.Windows.Forms.Button();
             this.btnFechar = new System.Windows.Forms.Button();
-            this.picImagemSalva = new System.Windows.Forms.PictureBox();
-            this.btnSalvarImagem = new System.Windows.Forms.Button();
             this.lblStatusImagem = new System.Windows.Forms.Label();
+            this.lblPastaDestino = new System.Windows.Forms.Label();
+            this.picImagemSalvar = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.picWebCam)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picImagemSalva)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picImagemSalvar)).BeginInit();
             this.SuspendLayout();
             // 
             // picWebCam
             // 
             this.picWebCam.Location = new System.Drawing.Point(12, 43);
             this.picWebCam.Name = "picWebCam";
-            this.picWebCam.Size = new System.Drawing.Size(309, 323);
+            this.picWebCam.Size = new System.Drawing.Size(411, 323);
             this.picWebCam.TabIndex = 0;
             this.picWebCam.TabStop = false;
             // 
@@ -59,19 +59,19 @@ namespace TCPStreamer
             this.btnFoto.UseVisualStyleBackColor = true;
             this.btnFoto.Click += new System.EventHandler(this.btnFoto_Click);
             // 
-            // lblPastaDestino
+            // lblPasta
             // 
-            this.lblPastaDestino.AutoSize = true;
-            this.lblPastaDestino.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblPastaDestino.Location = new System.Drawing.Point(13, 13);
-            this.lblPastaDestino.Name = "lblPastaDestino";
-            this.lblPastaDestino.Size = new System.Drawing.Size(144, 20);
-            this.lblPastaDestino.TabIndex = 3;
-            this.lblPastaDestino.Text = "Selecione a pasta :";
+            this.lblPasta.AutoSize = true;
+            this.lblPasta.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblPasta.Location = new System.Drawing.Point(13, 13);
+            this.lblPasta.Name = "lblPasta";
+            this.lblPasta.Size = new System.Drawing.Size(144, 20);
+            this.lblPasta.TabIndex = 3;
+            this.lblPasta.Text = "Selecione a pasta :";
             // 
             // btnProcurarPasta
             // 
-            this.btnProcurarPasta.Location = new System.Drawing.Point(572, 8);
+            this.btnProcurarPasta.Location = new System.Drawing.Point(350, 8);
             this.btnProcurarPasta.Name = "btnProcurarPasta";
             this.btnProcurarPasta.Size = new System.Drawing.Size(73, 32);
             this.btnProcurarPasta.TabIndex = 4;
@@ -81,7 +81,7 @@ namespace TCPStreamer
             // 
             // btnFechar
             // 
-            this.btnFechar.Location = new System.Drawing.Point(409, 387);
+            this.btnFechar.Location = new System.Drawing.Point(213, 387);
             this.btnFechar.Name = "btnFechar";
             this.btnFechar.Size = new System.Drawing.Size(68, 42);
             this.btnFechar.TabIndex = 5;
@@ -89,44 +89,44 @@ namespace TCPStreamer
             this.btnFechar.UseVisualStyleBackColor = true;
             this.btnFechar.Click += new System.EventHandler(this.btnFechar_Click);
             // 
-            // picImagemSalva
-            // 
-            this.picImagemSalva.Location = new System.Drawing.Point(336, 43);
-            this.picImagemSalva.Name = "picImagemSalva";
-            this.picImagemSalva.Size = new System.Drawing.Size(309, 323);
-            this.picImagemSalva.TabIndex = 7;
-            this.picImagemSalva.TabStop = false;
-            // 
-            // btnSalvarImagem
-            // 
-            this.btnSalvarImagem.Location = new System.Drawing.Point(213, 387);
-            this.btnSalvarImagem.Name = "btnSalvarImagem";
-            this.btnSalvarImagem.Size = new System.Drawing.Size(190, 42);
-            this.btnSalvarImagem.TabIndex = 8;
-            this.btnSalvarImagem.Text = "Salvar Imagem";
-            this.btnSalvarImagem.UseVisualStyleBackColor = true;
-            this.btnSalvarImagem.Click += new System.EventHandler(this.btnSalvarImagem_Click);
-            // 
             // lblStatusImagem
             // 
             this.lblStatusImagem.AutoSize = true;
-            this.lblStatusImagem.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblStatusImagem.Location = new System.Drawing.Point(503, 416);
+            this.lblStatusImagem.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblStatusImagem.Location = new System.Drawing.Point(13, 455);
             this.lblStatusImagem.Name = "lblStatusImagem";
-            this.lblStatusImagem.Size = new System.Drawing.Size(0, 13);
+            this.lblStatusImagem.Size = new System.Drawing.Size(0, 20);
             this.lblStatusImagem.TabIndex = 6;
+            // 
+            // lblPastaDestino
+            // 
+            this.lblPastaDestino.AutoSize = true;
+            this.lblPastaDestino.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblPastaDestino.Location = new System.Drawing.Point(154, 17);
+            this.lblPastaDestino.Name = "lblPastaDestino";
+            this.lblPastaDestino.Size = new System.Drawing.Size(0, 16);
+            this.lblPastaDestino.TabIndex = 7;
+            // 
+            // picImagemSalvar
+            // 
+            this.picImagemSalvar.Location = new System.Drawing.Point(287, 372);
+            this.picImagemSalvar.Name = "picImagemSalvar";
+            this.picImagemSalvar.Size = new System.Drawing.Size(68, 57);
+            this.picImagemSalvar.TabIndex = 8;
+            this.picImagemSalvar.TabStop = false;
+            this.picImagemSalvar.Visible = false;
             // 
             // flyoutWebCam
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(665, 450);
-            this.Controls.Add(this.btnSalvarImagem);
-            this.Controls.Add(this.picImagemSalva);
+            this.ClientSize = new System.Drawing.Size(435, 494);
+            this.Controls.Add(this.picImagemSalvar);
+            this.Controls.Add(this.lblPastaDestino);
             this.Controls.Add(this.lblStatusImagem);
             this.Controls.Add(this.btnFechar);
             this.Controls.Add(this.btnProcurarPasta);
-            this.Controls.Add(this.lblPastaDestino);
+            this.Controls.Add(this.lblPasta);
             this.Controls.Add(this.btnFoto);
             this.Controls.Add(this.picWebCam);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -137,7 +137,7 @@ namespace TCPStreamer
             this.Load += new System.EventHandler(this.flyoutWebCam_Load);
             this.Leave += new System.EventHandler(this.flyoutWebCam_Leave);
             ((System.ComponentModel.ISupportInitialize)(this.picWebCam)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picImagemSalva)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picImagemSalvar)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -147,11 +147,11 @@ namespace TCPStreamer
 
         private System.Windows.Forms.PictureBox picWebCam;
         private System.Windows.Forms.Button btnFoto;
-        private System.Windows.Forms.Label lblPastaDestino;
+        private System.Windows.Forms.Label lblPasta;
         private System.Windows.Forms.Button btnProcurarPasta;
         private System.Windows.Forms.Button btnFechar;
-        private System.Windows.Forms.PictureBox picImagemSalva;
-        private System.Windows.Forms.Button btnSalvarImagem;
         private System.Windows.Forms.Label lblStatusImagem;
+        private System.Windows.Forms.Label lblPastaDestino;
+        private System.Windows.Forms.PictureBox picImagemSalvar;
     }
 }

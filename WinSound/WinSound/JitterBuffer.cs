@@ -5,14 +5,8 @@ using System.Text;
 
 namespace WinSound
 {
-    /// <summary>
-    /// JitterBuffer
-    /// </summary>
     public class JitterBuffer
     {
-        /// <summary>
-        /// Konstruktor
-        /// </summary>
         public JitterBuffer(Object sender, uint maxRTPPackets, uint timerIntervalInMilliseconds)
         {
             //Mindestanzahl einhalten
@@ -28,7 +22,7 @@ namespace WinSound
             Init();
         }
 
-        //Attribute
+
         private Object m_Sender = null;
         private uint m_MaxRTPPackets = 10;
         private uint m_TimerIntervalInMilliseconds = 20;
@@ -38,13 +32,8 @@ namespace WinSound
         private bool m_Underflow = true;
         private bool m_Overflow = false;
 
-        //Delegates bzw. Event
         public delegate void DelegateDataAvailable(Object sender, RTPPacket packet);
         public event DelegateDataAvailable DataAvailable;
-
-        /// <summary>
-        /// Anzahl Packete im Buffer
-        /// </summary>
         public int Length
         {
             get
@@ -52,9 +41,6 @@ namespace WinSound
                 return m_Buffer.Count;
             }
         }
-        /// <summary>
-        /// Maximale Anzahl an RTP Packeten
-        /// </summary>
         public uint Maximum
         {
             get
@@ -62,9 +48,7 @@ namespace WinSound
                 return m_MaxRTPPackets;
             }
         }
-        /// <summary>
-        /// IntervalInMilliseconds
-        /// </summary>
+
         public uint IntervalInMilliseconds
         {
             get
@@ -72,31 +56,23 @@ namespace WinSound
                 return m_TimerIntervalInMilliseconds;
             }
         }
-        /// <summary>
-        /// Init
-        /// </summary>
+
         private void Init()
         {
             InitTimer();
         }
-        /// <summary>
-        /// InitTimer
-        /// </summary>
+
         private void InitTimer()
         {
             m_Timer.TimerTick += new EventTimer.DelegateTimerTick(OnTimerTick);
         }
-        /// <summary>
-        /// Start
-        /// </summary>
+
         public void Start()
         {
             m_Timer.Start(m_TimerIntervalInMilliseconds, 0);
             m_Underflow = true;
         }
-        /// <summary>
-        /// Stop
-        /// </summary>
+
         public void Stop()
         {
             m_Timer.Stop();
