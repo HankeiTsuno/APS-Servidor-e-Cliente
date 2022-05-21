@@ -9,7 +9,6 @@ namespace WinSound
     {
         public JitterBuffer(Object sender, uint maxRTPPackets, uint timerIntervalInMilliseconds)
         {
-            //Mindestanzahl einhalten
             if (maxRTPPackets < 2)
             {
                 throw new Exception("Wrong Arguments. Minimum maxRTPPackets is 2");

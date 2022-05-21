@@ -10,3 +10,8 @@ D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cli
 D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\WinSound\WinSound\obj\Debug\WinSound.dll
 D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\WinSound\WinSound\obj\Debug\WinSound.pdb
 D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\WinSound\WinSound\obj\Debug\WinSound.csproj.AssemblyReference.cache
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\WinSound\WinSound\bin\Debug\WinSound.dll
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\WinSound\WinSound\bin\Debug\WinSound.pdb
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\WinSound\WinSound\obj\Debug\WinSound.csproj.CoreCompileInputs.cache
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\WinSound\WinSound\obj\Debug\WinSound.dll
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\WinSound\WinSound\obj\Debug\WinSound.pdb

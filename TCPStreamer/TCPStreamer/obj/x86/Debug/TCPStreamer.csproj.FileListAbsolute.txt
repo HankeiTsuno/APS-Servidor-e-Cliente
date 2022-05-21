@@ -55,3 +55,23 @@ D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cli
 D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\bin\Debug\TCPStreamer.application
 D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\obj\x86\Debug\TCPStreamer.exe.manifest
 D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\obj\x86\Debug\TCPStreamer.application
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\bin\Debug\TCPStreamer.exe.config
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\bin\Debug\TCPStreamer.exe.manifest
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\bin\Debug\TCPStreamer.application
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\bin\Debug\TCPStreamer.exe
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\bin\Debug\TCPStreamer.pdb
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\bin\Debug\DirectX.Capture.dll
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\bin\Debug\DShowNET.dll
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\bin\Debug\WinSound.dll
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\bin\Debug\WinSound.pdb
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\obj\x86\Debug\TCPStreamer.csproj.AssemblyReference.cache
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\obj\x86\Debug\TCPStreamer.FormMain.resources
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\obj\x86\Debug\TCPStreamer.Properties.Resources.resources
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\obj\x86\Debug\TCPStreamer.flyoutWebCam.resources
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\obj\x86\Debug\TCPStreamer.csproj.GenerateResource.cache
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\obj\x86\Debug\TCPStreamer.csproj.CoreCompileInputs.cache
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\obj\x86\Debug\TCPStreamer.exe.manifest
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\obj\x86\Debug\TCPStreamer.application
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\obj\x86\Debug\TCPStreamer.csproj.CopyComplete
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\obj\x86\Debug\TCPStreamer.exe
+C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\obj\x86\Debug\TCPStreamer.pdb

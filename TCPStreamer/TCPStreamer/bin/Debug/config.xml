@@ -4,10 +4,10 @@
   <IPAddressServer>127.0.0.1</IPAddressServer>
   <PortClient>8000</PortClient>
   <PortServer>8000</PortServer>
-  <SoundInputDeviceNameClient>Microfone (5- GENERAL WEBCAM)</SoundInputDeviceNameClient>
+  <SoundInputDeviceNameClient>Microfone (Realtek(R) Audio)</SoundInputDeviceNameClient>
   <SoundOutputDeviceNameClient>None</SoundOutputDeviceNameClient>
-  <SoundInputDeviceNameServer>Microfone (5- GENERAL WEBCAM)</SoundInputDeviceNameServer>
-  <SoundOutputDeviceNameServer>Realtek Digital Output (Realtek</SoundOutputDeviceNameServer>
+  <SoundInputDeviceNameServer>Microfone (Realtek(R) Audio)</SoundInputDeviceNameServer>
+  <SoundOutputDeviceNameServer>Realtek HD Audio 2nd output (Re</SoundOutputDeviceNameServer>
   <SamplesPerSecondClient>5000</SamplesPerSecondClient>
   <BitsPerSampleClient>16</BitsPerSampleClient>
   <ChannelsClient>1</ChannelsClient>

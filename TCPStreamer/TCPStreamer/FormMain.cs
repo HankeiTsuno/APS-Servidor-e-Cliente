@@ -24,6 +24,7 @@ namespace TCPStreamer
             Init();
         }
 
+        private string sCaminhoIcones = @"C:\Users\ferreiramat\Desktop\Matheus\SERVIDOR-CLIENT\TCPStreamer\TCPStreamer\Icones\";
         private ServCli.TCPClientVoz m_Client;
         private ServCli.TCPServidorVoz m_Server;
         private Configuration m_Config = new Configuration();
@@ -1213,7 +1214,7 @@ namespace TCPStreamer
                     btnListen.Margin = new Padding(0, FlowLayoutPanelServerListen.Controls.Count > 0 ? 3 : 8, 0, 3);
                     btnListen.Tag = stData;
                     btnListen.BackColor = Color.LightGray;
-                    btnListen.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Listen_On.png");
+                    btnListen.BackgroundImage = Image.FromFile(sCaminhoIcones + "Listen_On.png");
                     btnListen.BackgroundImageLayout = ImageLayout.Zoom;
                     btnListen.Tag = stData;
                     btnListen.MouseClick += new MouseEventHandler(OnButtonServerThreadListenClick);
@@ -1240,7 +1241,7 @@ namespace TCPStreamer
                     btnSpeak.Tag = stData;
                     btnSpeak.ImageAlign = ContentAlignment.MiddleCenter;
                     btnSpeak.BackColor = Color.LightGray;
-                    btnSpeak.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Speak_On.png");
+                    btnSpeak.BackgroundImage = Image.FromFile(sCaminhoIcones + "Speak_On.png");
                     btnSpeak.BackgroundImageLayout = ImageLayout.Zoom;
                     btnSpeak.Tag = stData;
                     btnSpeak.MouseClick += new MouseEventHandler(OnButtonServerThreadSpeakClick);
@@ -1266,12 +1267,12 @@ namespace TCPStreamer
 
                     if (data.IsMute)
                     {
-                        btn.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Listen_Off.png");
+                        btn.BackgroundImage = Image.FromFile(sCaminhoIcones + "Listen_Off.png");
                         btn.BackgroundImageLayout = ImageLayout.Zoom;
                     }
                     else
                     {
-                        btn.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Listen_On.png");
+                        btn.BackgroundImage = Image.FromFile(sCaminhoIcones + "Listen_On.png");
                         btn.BackgroundImageLayout = ImageLayout.Zoom;
                     }
                 }
@@ -1294,12 +1295,12 @@ namespace TCPStreamer
 
                     if (data.ServerThread.IsMute)
                     {
-                        btn.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Speak_Off.png");
+                        btn.BackgroundImage = Image.FromFile(sCaminhoIcones + "Speak_Off.png");
                         btn.BackgroundImageLayout = ImageLayout.Zoom;
                     }
                     else
                     {
-                        btn.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Speak_On.png");
+                        btn.BackgroundImage = Image.FromFile(sCaminhoIcones + "Speak_On.png");
                         btn.BackgroundImageLayout = ImageLayout.Zoom;
                     }
                 }
@@ -1961,12 +1962,12 @@ namespace TCPStreamer
         {
             if (m_Config.ServerNoSpeakAll)
             {
-                btnServidorMic.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Speak_Off.png");
+                btnServidorMic.BackgroundImage = Image.FromFile(sCaminhoIcones + "Speak_Off.png");
                 btnServidorMic.BackgroundImageLayout = ImageLayout.Zoom;
             }
             else
             {
-                btnServidorMic.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Speak_On.png");
+                btnServidorMic.BackgroundImage = Image.FromFile(sCaminhoIcones + "Speak_On.png");
                 btnServidorMic.BackgroundImageLayout = ImageLayout.Zoom;
             }
         }
@@ -1974,12 +1975,12 @@ namespace TCPStreamer
         {
             if (m_Config.ClientNoSpeakAll)
             {
-                btnClienteMic.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Speak_Off.png");
+                btnClienteMic.BackgroundImage = Image.FromFile(sCaminhoIcones + "Speak_Off.png");
                 btnClienteMic.BackgroundImageLayout = ImageLayout.Zoom;
             }
             else
             {
-                btnClienteMic.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Speak_On.png");
+                btnClienteMic.BackgroundImage = Image.FromFile(sCaminhoIcones + "Speak_On.png");
                 btnClienteMic.BackgroundImageLayout = ImageLayout.Zoom;
             }
         }
@@ -1993,12 +1994,12 @@ namespace TCPStreamer
         {
             if (m_Config.MuteClientPlaying)
             {
-                btncClienteAudio.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Listen_Off.png");
+                btncClienteAudio.BackgroundImage = Image.FromFile(sCaminhoIcones + "Listen_Off.png");
                 btncClienteAudio.BackgroundImageLayout = ImageLayout.Zoom;
             }
             else
             {
-                btncClienteAudio.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Listen_On.png");
+                btncClienteAudio.BackgroundImage = Image.FromFile(sCaminhoIcones + "Listen_On.png");
                 btncClienteAudio.BackgroundImageLayout = ImageLayout.Zoom;
             }
         }
@@ -2014,12 +2015,12 @@ namespace TCPStreamer
         {
             if (m_Config.MuteServerListen)
             {
-                btnServidorAudio.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Listen_Off.png");
+                btnServidorAudio.BackgroundImage = Image.FromFile(sCaminhoIcones + "Listen_Off.png");
                 btnServidorAudio.BackgroundImageLayout = ImageLayout.Zoom;
             }
             else
             {
-                btnServidorAudio.BackgroundImage = Image.FromFile(@"D:\SALVAR ESTA PASTA\MATERIAS FACULDADE\APS\TcpClienteOficial\APS-Servidor-e-Cliente\TCPStreamer\TCPStreamer\Icones\Listen_On.png");
+                btnServidorAudio.BackgroundImage = Image.FromFile(sCaminhoIcones + "Listen_On.png");
                 btnServidorAudio.BackgroundImageLayout = ImageLayout.Zoom;
             }
 
